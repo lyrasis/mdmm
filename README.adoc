@@ -1,0 +1,34 @@
+= mdmm (Migration data manipulator & mapper)
+
+Tools to work with migration data (metadata and objects) as produced by https://github.com/lyrasis/cdmtools/[cdmtools] and https://github.com/lyrasis/omeka-data-tools[omekatools]. Assumes the data formats, directory structures, and naming conventions used by those tools will be in place.
+
+One tool to do the following, since these processes should be basically the same, regardless of source system.
+
+- create CSV (one row per field per record, with raw field value) for profiling metadata field values in preparation for metadata mapping work
+- automated metadata cleanup (via configurable find-replace)
+- multivalued field splitting
+- mapping JSON-based records to MODS
+- moving/structuring/renaming metadata and object files to create Islandora-ready ingest directories
+
+== Installation
+
+Install it yourself as:
+
+`$ gem install mdmm`
+
+Copy `config/config.yaml.example` to `config/config.yaml` and edit the new file.
+
+
+== Usage
+
+For list of commands/functions:
+
+`$ exe/mdmm help`
+
+For details on what each command does:
+
+`$ exe/mdmm help {command}` 
+
+== License
+
+The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).

@@ -2,6 +2,28 @@ require 'mdmm'
 
 module Mdmm
   class CommandLine < Thor
+    no_commands{
+      def get_colls
+        colls = CONFIG.colls.map{ |c| Mdmm::Collection.new(c) }
+
+        if options[:coll].empty?
+          # not specifying collections will return all collections
+          return colls
+        else
+          # return only the specified collections
+          collnames = colls.map{ |c| c.name }
+          options[:coll].split(',').each{ |c|
+            unless collnames.include?(c)
+              puts "There is no directory named #{c} in #{Mdmm::WRK_DIR}"
+              puts "Run `exe/mdmm list_colls` to see known collections in your config."
+              exit
+            end
+            return colls.select{ |c| clist.include?(c.name) }
+          }
+        end
+      end #get_colls
+    }
+    
     map %w[--version -v] => :__version
     desc '--version, -v', 'print the version'
     def __version
@@ -13,36 +35,33 @@ module Mdmm
     def __config
       puts "\nYour project working directory:"
       puts Mdmm::WRK_DIR
-      puts "\nYour Omeka sites:"
-      Mdmm::CONFIG.sites.each { |s|
-        site = Mdmm::Site.new(s)
-        puts site.name
+      puts "\nLogfile path:"
+      puts Mdmm::CONFIG.logfile
+    end
+
+    desc 'list_colls', 'list directories that will be treated as collections'
+    def list_colls
+      puts "\nDirectories to be treated as collections:"
+      Mdmm::CONFIG.colls.each { |c|
+        puts "#{Mdmm::WRK_DIR}/#{c}"
       }
     end
     
-    desc 'get_coll_info', 'get collection info per site, build coll dirs, save metadata'
+    
+    desc 'list_collection_fields', 'get collection info per site, build coll dirs, save metadata'
     long_desc <<-LONGDESC
-Collection information is gathered via the ListSets OAI verb. A site may have one, many, or no collections.
+`exe/mdmm list_collection_fields` produces a csv file of the descriptive metadata fields used in item records for each collection.
 
-If a site has no collections, a single collection is created with the same name as the site. This preserves the site>collection hierarchy for the rest of the processing. The collid assigned to this mock collection will be 0.
+This file is written to: `wrk_dir/_fields.csv` and lists the CDM collection (or Omeka site), followed by the metadata field name (Omeka) or nickname (CDM).
 
-For each collection, a directory is created in the site directory. The collection directory name is `coll_{collid}`.
+The data in this file is appropriate for incorporating into metadata mapping documents.
 
-The collid value is the SetSpec number in OAI, and the `:id` value used in the REST API.
-
-For each collection, the Dublin Core description is saved to `coll_dir/_{collid}_DC.xml`. If there is no Dublin Core description for the collection (and the collection in not a mock collection), a warning is written to the log.
-
-_collections.json is written in each site directory to persist collection info.
-
-If _collections.json exists in a site directory, calling `get_coll_info` without `--force=true` will display collection info from the persisted JSON.
-
-If _collections.json does not exist for a site, an OAI request will generate it. 
+Assumes migration records have already been created using cdmtools or omeka-data-tools.
     LONGDESC
-    option :site, :desc => 'comma-separated list of site names to include in processing', :default => ''
-    option :force, :desc => 'boolean (true, false) - whether to force refresh of data', :default => false
-    def get_coll_info
-      sites = get_sites
-      sites.each { |site| site.process_colls(options[:force]) }
+    option :coll, :desc => 'comma-separated list of coll names to include in processing', :default => ''
+    def list_collection_fields
+      colls = get_colls
+      Mdmm::FieldLister.new(colls)
     end
 
   end # CommandLine

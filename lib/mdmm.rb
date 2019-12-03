@@ -1,4 +1,5 @@
 # standard library
+require 'csv'
 require 'json'
 require 'logger'
 require 'pp'
@@ -17,4 +18,11 @@ module Mdmm
   autoload :WRK_DIR, 'mdmm/wrk_dir'
 
   autoload :CommandLine, 'mdmm/command_line'
+  autoload :Collection, 'mdmm/collection'
+  autoload :ConfigReader, 'mdmm/config_reader'
+
+  # given array of collection objects, writes _fields.csv to WRK_DIR
+  autoload :FieldLister, 'mdmm/field_lister'
+
+  autoload :MigRecord, 'mdmm/record'
 end

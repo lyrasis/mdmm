@@ -20,7 +20,7 @@ module Mdmm
   autoload :CommandLine, 'mdmm/command_line'
   autoload :Collection, 'mdmm/collection'
   autoload :ConfigReader, 'mdmm/config_reader'
-  autoload :DateCleaner, 'mdmm/date_cleaner'
+  autoload :DateParser, 'mdmm/date_cleaner'
 
   # given array of collection objects, writes _fields.csv to WRK_DIR
   autoload :FieldLister, 'mdmm/field_lister'
@@ -36,6 +36,11 @@ module Mdmm
 
   # This logfile is extremely verbose, so delete it every time the application starts
   File.delete(Mdmm::CONFIG.logfile) if File::exist?(Mdmm::CONFIG.logfile)
+
+  def self.date_field?(fieldname)
+    return true if Mdmm::CONFIG.date_fields.include?(fieldname)
+  end
+  
 end
 
 

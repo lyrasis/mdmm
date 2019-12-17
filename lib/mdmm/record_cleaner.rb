@@ -31,6 +31,7 @@ module Mdmm
       #      field_remapping_handler(Mdmm::CONFIG.post_move_fields)
       whitespace_cleaner #to take care of any issues introduced by replacements
       change_case
+      remove_empty_fields
       clean_dates
       compile_cleaned_record(fields_cat[:to_ignore])
       write_clean_record
@@ -39,11 +40,13 @@ module Mdmm
     private
 
     def clean_dates
+      date_fields = {}
       @working.each{ |field, value|
-        if date_field?(field)
-          d = Mdmm::DateCleaner.new("#{coll.name}/#{id}", value).result
-          @working[field] = d.join(';;;')
-        end
+        date_fields[field] = value if Mdmm.date_field?(field)
+      }
+      date_fields.each{ |field, value|
+          d = Mdmm::DateParser.new("#{coll.name}/#{id}", value).result
+          @working["#{field}_cleaned"] = d.join(';;;')
       }
     end
     
@@ -250,10 +253,6 @@ module Mdmm
       return false
     end
 
-    def date_field?(fieldname)
-      return true if Mdmm::CONFIG.date_fields.include?(fieldname)
-    end
-    
     def categorize_fields
       h = { :to_clean => {},
            :to_ignore => {}

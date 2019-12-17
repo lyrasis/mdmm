@@ -33,6 +33,9 @@ module Mdmm
     end
 
     def clean_records
+      ex_clean = Dir.new(@cleanrecdir).children.map{ |name| "#{@cleanrecdir}/#{name}" } if Dir.exist?(@cleanrecdir)
+      ex_clean.each{ |crec| File.delete(crec) }
+      
       @migrecs.each{ |mr|
         migrec = MigRecord.new(self, mr)
         Mdmm::LOG.debug("Cleaning #{@name}/#{migrec.id}")

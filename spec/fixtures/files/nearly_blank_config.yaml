@@ -1,0 +1,44 @@
+# base working directory or directories for the project
+# each directory found in one of these paths is treated like a collection
+wrk_dirs:
+  - ~/code/mdmm/spec/fixtures/testproject/systema
+  - ~/code/mdmm/spec/fixtures/testproject/systemb
+
+# path to logfile
+logfile: ~/code/mdmm/spec/fixtures/testproject/mdmm.log
+
+# do not compile data/stats/reports on field values or types for field names beginning with (or equaling)
+#  any of the following
+reporting_ignore_field_prefixes:
+  - 'dm'
+  - 'mig'
+
+# do not perform cleanup operations on field values in fields with names that begin with (or equal) any
+#   of the following
+cleanup_ignore_field_prefixes:
+  - 'dontcleanme'
+
+replacements:
+ # unicode replacement character
+  - colls:
+    - 'acoll1'
+    - 'acoll2'
+    fields:
+      - 'creato'
+    find: "�"
+    replace: "'"
+    type: plain
+  # delete HTML in all fields in all collections
+  - colls: ''
+    fields: ''
+    find: '<\/?(br|div|em|p|span|strong|sup) *\/*>'
+    replace: ' '
+    type: regexp
+
+mappings: ~/code/mdmm/spec/fixtures/files/briefmappings.csv
+
+# list of fields to process as dates
+# special cleanup and mappings are done on dates
+date_fields:
+  - 'date'
+  - 'publis'

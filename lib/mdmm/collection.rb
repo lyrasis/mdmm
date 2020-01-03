@@ -4,7 +4,6 @@ module Mdmm
   class Collection
     attr_reader :name # collection name
     attr_reader :colldir # full path to collection directory
-    attr_reader :origrecdir # path to directory for original records for individual objects
     attr_reader :migrecdir # path to directory for JSON object records modified with migration-specific data
     attr_reader :cleanrecdir # path to directory for transformed/cleaned migration records
     attr_reader :modsdir # path to directory for MODS records
@@ -13,14 +12,15 @@ module Mdmm
 
     # Directories within WRK_DIR are identified as collections
     def initialize(colldir)
-      @colldir = colldir
+      @colldir = File.expand_path(colldir)
       @name = colldir.split('/').pop
-      @origrecdir = set_origrecdir
       @migrecdir = "#{@colldir}/_migrecords"
       @cleanrecdir = "#{@colldir}/_cleanrecords"
+      Dir.mkdir(@cleanrecdir) unless Dir::exist?(@cleanrecdir)
       @modsdir = "#{@colldir}/_mods"
       Dir.mkdir(@modsdir) unless Dir::exist?(@modsdir)
       set_migrecs
+      self
     end
 
     def map_records
@@ -33,14 +33,13 @@ module Mdmm
     end
 
     def clean_records
-      ex_clean = Dir.new(@cleanrecdir).children.map{ |name| "#{@cleanrecdir}/#{name}" } if Dir.exist?(@cleanrecdir)
-      ex_clean.each{ |crec| File.delete(crec) }
-      
+      delete_existing_cleanrecs
       @migrecs.each{ |mr|
         migrec = MigRecord.new(self, mr)
         Mdmm::LOG.debug("Cleaning #{@name}/#{migrec.id}")
         migrec.clean
       }
+      set_cleanrecs
     end
     
     def set_cleanrecs
@@ -55,6 +54,11 @@ module Mdmm
 
     private
 
+    def delete_existing_cleanrecs
+      ex_clean = Dir.new(@cleanrecdir).children.map{ |name| "#{@cleanrecdir}/#{name}" } if Dir.exist?(@cleanrecdir)
+      ex_clean.each{ |crec| File.delete(crec) }
+    end
+    
     def set_migrecs
       @migrecs = Dir.new(@migrecdir).children.map{ |name| "#{@migrecdir}/#{name}" }
       if @migrecs.length == 0
@@ -65,23 +69,5 @@ module Mdmm
       end
     end
 
-    def set_origrecdir
-      possible = [
-        "#{@colldir}/_cdmrecords",
-        "#{@colldir}/_oxrecords"
-      ]
-      extant = possible.select{ |d| Dir::exist?(d) }
-      case extant.length
-      when 1
-        return extant[0]
-      when 0
-        Mdmm::LOG.warn("No original record directory was identified for collection: #{@colldir}")
-        return nil
-      else
-        Mdmm::LOG.warn("Multiple original record directories identified for collection: #{@colldir}")
-        return nil
-      end
-    end
-    
   end # Collection
 end # Mdmm

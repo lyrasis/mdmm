@@ -1,11 +1,11 @@
 # base working directory or directories for the project
 # each directory found in one of these paths is treated like a collection
 wrk_dirs:
-  - /opt/migrations/client/cdm
-  - /opt/migrations/client/omeka
+  - ~/code/mdmm/spec/fixtures/testproject/systema
+  - ~/code/mdmm/spec/fixtures/testproject/systemb
 
 # path to logfile
-logfile: /opt/migrations/client/mdmm.log
+logfile: ~/code/mdmm/spec/fixtures/testproject/mdmm.log
 
 # do not compile data/stats/reports on field values or types for field names beginning with (or equaling)
 #  any of the following
@@ -16,20 +16,11 @@ reporting_ignore_field_prefixes:
   - migchilddata
   - restrictionCode
 
-fieldvalues_file: /opt/migrations/client/_fieldvalues.csv
+fieldvalues_file: ~/code/mdmm/spec/fixtures/testproject/_fieldvalues.csv
 
 # do not perform cleanup operations on field values in fields with names that begin with (or equal) any
 #   of the following
 cleanup_ignore_field_prefixes:
-  - mig
-  - dm
-  - fullrs
-  - find
-  - restrictionCode
-
-# do not perform metadata mapping on fields with names that begin with (or equal) any
-#   of the following
-mapping_ignore_field_prefixes:
   - mig
   - dm
   - fullrs
@@ -44,7 +35,7 @@ date_fields:
   
 # full path to mappings csv in the following format
 #   collectionName,fieldname,mappingsnippet
-mappings: '/opt/migrations/client/mappings.csv'
+mappings: ~/code/mdmm/spec/fixtures/files/mappings.csv
 
 # fix things that break the initial splitting and remapping processes
 prelim_replacements:
@@ -59,25 +50,26 @@ prelim_replacements:
 splits:
   # split multivalued on ' and '
   - colls:
-      - coll1
-      - coll2
+      - 'acoll1'
+      - 'acoll2'
     fields:
-      - author
+      - 'author'
     find: ' and '
     replace: ';;;'
     type: plain
   # split multivalued on ';'
   - colls: ''
     fields:
-      - author
-      - identifier
-      - subject
+      - 'author'
+      - 'identifier'
+      - 'subject'
     find: ';'
     replace: ';;;'
     type: plain
     # split descriptions on line breaks because of more complex formatting
   - colls: ''
-    fields: 'description'
+    fields:
+      - 'description'
     find: '<br *\/> *<br *\/>'
     replace: ';;;'
     type: regexp
@@ -85,18 +77,21 @@ splits:
 # configure the addition of constant values
 constant_fields:
   - colls: ''
-    field: recsourceorg
-    value: valueOfMARCOrgCode
+    field:
+      - 'recsourceorg'
+    value: 'valueOfMARCOrgCode'
   - colls: 
-      - omekaColl1
-      - omekaColl2
-    field: sourcesystem
-    value: Omeka
+      - 'bcolla'
+      - 'bcollb'
+    field:
+      - 'sourcesystem'
+    value: 'Omeka'
   - colls:
-      - cdmColl1
-      - cdmColl2
-    field: sourcesystem
-    value: CONTENTdm
+      - 'acoll1'
+      - 'acoll2'
+      - 'acoll3'
+    field: 'sourcesystem'
+    value: 'CONTENTdm'
     
 # collections/fields in which to standardize first-character case
 # mainly used for fields that will populate facets, to minimize split/near-duplicate
@@ -104,8 +99,8 @@ constant_fields:
 case_changes:  
   - colls: ''
     fields:
-       - subject
-       - format
+       - 'subject'
+       - 'format'
     case: upper
 
 # Map a field value to a different field based on field content
@@ -116,12 +111,14 @@ case_changes:
 #  '\.' will match literal period
 move_fields:
   - colls: ''
-    fields: coverage
-    moveto: coveragegeog
+    fields:
+      - 'coverage'
+    moveto: 'coveragegeog'
     condition: 'United States'
   - colls: ''
-    fields: type
-    moveto: format
+    fields:
+      - 'type'
+    moveto: 'format'
     condition: '^[Ss]peech$'
 
 # Moves a field value to another field and replaces it in original field with a different value.
@@ -134,17 +131,19 @@ move_fields:
 # replace = this value will be added to original/current field
 move_and_replaces:
   - colls: ''
-    fields: type
+    fields:
+      - 'type'
     condition: '^[Mm]ap'
-    moveto: format
+    moveto: 'format'
     replacewith: 'cartographic'
 
 # Adds a value to derivefield based on field, but does not change source field value
 derive_fields:
   - colls: ''
-    fields: format
+    fields:
+      - 'format'
     condition: '[Pp]hotograph|JPEG'
-    derivefield: type
+    derivefield: 'type'
     derivevalue: 'still image'
     
 # Match part of one field and put the matching string into another field
@@ -154,9 +153,10 @@ derive_fields:
 # extractmatch = capture group/match segment that will be added to extracttofield
 extractions:
   - colls: ''
-    fields: reposa
+    fields:
+      - 'reposa'
     condition: 'at: (http.*)$'
-    extracttofield: hostcolllink
+    extracttofield: 'hostcolllink'
     extractmatch: 1
     
 # string replacements to be done
@@ -166,15 +166,27 @@ extractions:
 #  NOTE: the surrounding // are NOT included in regexp find strings. 
 replacements:
  # unicode replacement character
-  - colls: ''
-    fields: 'creato'
+  - colls:
+    - 'acoll1'
+    - 'acoll2'
+    fields:
+      - 'creato'
     find: "�"
     replace: "'"
     type: plain
-  # delete HTML
+  # delete HTML in all fields in all collections
   - colls: ''
     fields: ''
     find: '<\/?(br|div|em|p|span|strong|sup) *\/*>'
     replace: ' '
     type: regexp
     
+# Replacements that run last and treat the entire field (i.e. all multi-values)
+#  as one string
+cross_multival_replacements:
+  - colls: ''
+    fields:
+      - 'description'
+    find: ';;;Sources:;;;'
+    replace: ';;;Sources: '
+    type: plain

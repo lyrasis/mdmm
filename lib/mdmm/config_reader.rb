@@ -2,53 +2,57 @@ require 'mdmm'
 
 module Mdmm
   class ConfigReader
-    attr_reader :wrk_dirs
-    attr_reader :logfile
+    attr_reader :path # path to config file
+    attr_reader :config # the entire config hash
     attr_reader :colls # array of collection paths
-    attr_reader :reporting_ignore_field_prefixes
-    attr_reader :fieldvalues_file
-    attr_reader :cleanup_ignore_field_prefixes
-    attr_reader :mv_delimiter
-    attr_reader :prelim_replacements
-    attr_reader :replacements
-    attr_reader :splits
-    attr_reader :case_changes
-    attr_reader :move_fields
-    attr_reader :post_move_fields
-    attr_reader :move_and_replaces
-    attr_reader :derive_fields
-    attr_reader :extractions
-    attr_reader :constant_fields
-    attr_reader :date_fields
-    attr_reader :mappings
-    
+    attr_reader :mappings # array of MODS mappings
+
     def initialize
-      config = YAML.load_file('config/config.yaml')
-      @wrk_dirs = config['wrk_dirs']
-      @logfile = config['logfile']
-      @colls = []
+      @path = Mdmm::CONFIGPATH.empty? ? 'config/config.yaml' : Mdmm::CONFIGPATH
+      @config = YAML.load_file(@path)
+      set_attributes
+      @wrk_dirs.map!{ |dir| File.expand_path(dir) }
       set_colls
-      @reporting_ignore_field_prefixes = config['reporting_ignore_field_prefixes']
-      @fieldvalues_file = config['fieldvalues_file']
-      @cleanup_ignore_field_prefixes = config['cleanup_ignore_field_prefixes']
-      @mv_delimiter = config['mv_delimiter']
-      @prelim_replacements = config['prelim_replacements']
-      @replacements = config['replacements']      
-      @splits = config['splits']
-      @case_changes = config['case_changes']
-      @move_fields = config['move_fields']
-      #      @post_move_fields = config['post_move_fields']
-      @move_and_replaces = config['move_and_replaces']
-      @derive_fields = config['derive_fields']
-      @extractions = config['extractions']
-      @constant_fields = config['constant_fields']
-      @date_fields = config['date_fields']
-      @mappings = get_mappings(config['mappings'])
+      @mappings = config['mappings'] ? get_mappings(config['mappings']) : {}
+      return @config
     end
 
     private
 
+    def set_attributes
+      # reader attributes set verbatim from config are created and populated as
+      #  empty arrays
+      [
+        'wrk_dirs',
+        'logfile',
+        'reporting_ignore_field_prefixes',
+        'fieldvalues_file',
+        'cleanup_ignore_field_prefixes',
+        'date_fields',
+        'prelim_replacements',
+        'splits',
+        'constant_fields',
+        'case_changes',
+        'move_fields',
+        'move_and_replaces',
+        'derive_fields',
+        'extractions',
+        'replacements',
+        'cross_multival_replacements'
+      ].each{ |atr|
+        self.class.instance_eval{ attr_reader atr.to_sym }
+        instance_variable_set("@#{atr}", [])
+      }
+
+      # iterate through the config hash and set the verbatim values
+      @config.each{ |k, v|
+        next if k == 'mappings'
+        instance_variable_set("@#{k}", v)
+      }
+    end
+    
     def set_colls
+      @colls = []
       @wrk_dirs.each{ |wrk_dir|
         children = Dir.children(wrk_dir)
         colls = children.select{ |n| File.directory?("#{wrk_dir}/#{n}") }
@@ -58,7 +62,7 @@ module Mdmm
 
     def get_mappings(path)
       maphash = {}
-      CSV.foreach(path, headers: true) do |row|
+      CSV.foreach(File.expand_path(path), headers: true) do |row|
         coll = row['coll alias']
         mapping = row['MODS']
         if maphash.has_key?(coll)
@@ -72,7 +76,5 @@ module Mdmm
     
       
   end
-
-    CONFIG = Mdmm::ConfigReader.new
 
 end

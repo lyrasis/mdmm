@@ -20,6 +20,12 @@ module Mdmm
       else
         @id = @json['dmrecord']
       end
+      self
+    end
+
+    def has_field?(fieldname)
+      return true if @json[fieldname] && !@json[fieldname].empty?
+      return false
     end
 
     private

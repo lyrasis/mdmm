@@ -27,10 +27,10 @@ module Mdmm
       field_remapping_handler(Mdmm::CONFIG.derive_fields)
       field_remapping_handler(Mdmm::CONFIG.extractions)
       replacement_handler(Mdmm::CONFIG.replacements)
-      add_constants if Mdmm::CONFIG.constant_fields
-      #      field_remapping_handler(Mdmm::CONFIG.post_move_fields)
+      add_constants if Mdmm::CONFIG.constant_fields      
       whitespace_cleaner #to take care of any issues introduced by replacements
       change_case
+      replacement_handler(Mdmm::CONFIG.cross_multival_replacements, split: false)
       remove_empty_fields
       clean_dates
       compile_cleaned_record(fields_cat[:to_ignore])
@@ -200,39 +200,42 @@ module Mdmm
       }
     end
 
-    def replacement_handler(configs)
+    def replacement_handler(configs = [], split: true)
       configs.each{ |sub|
         case applies_to_coll?(sub)
         when false
           next
         when true
           @working.each{ |field, value|
-            do_replacements_on_field(sub, field, value)
+            do_replacements_on_field(sub, field, value, split)
           }
         end
       }
     end
 
-    def do_replacements_on_field(sub, field, value)
+    def do_replacements_on_field(sub, field, value, split)
       case applies_to_field?(sub, field)
       when false
         @working[field] = value
       when true
-        do_replacement(sub, field, value)
+        do_replacement(sub, field, value, split)
       end
     end
 
-    def do_replacement(sub, field, value)
-      vsplit = value.split(';;;')
+    def do_replacement(sub, field, value, split)
+      vsplit = value.split(';;;') if split
       case sub['type']
       when 'plain'
-        cleaned = vsplit.map{ |e| e.gsub(sub['find'], sub['replace']) }
+        cleaned = vsplit.map{ |e| e.gsub(sub['find'], sub['replace']) } if split
+        cleaned = value.gsub(sub['find'], sub['replace'])  if !split
       when 'regexp'
-        cleaned = vsplit.map{ |e| e.gsub(Regexp.new(sub['find']), sub['replace']) }
+        cleaned = vsplit.map{ |e| e.gsub(Regexp.new(sub['find']), sub['replace']) } if split
+        cleaned = value.gsub(Regexp.new(sub['find']), sub['replace']) if !split
       else
         puts "No type given for REPLACEMENT (''#{sub['find']}'' -> ''#{sub['replace']}''"
       end
-      result = cleaned.join(';;;')
+      result = cleaned.join(';;;') if split
+      result = cleaned if !split
       @working[field] = result
 
       case value == result

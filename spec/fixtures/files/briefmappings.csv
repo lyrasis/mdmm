@@ -1,0 +1,5 @@
+coll alias,nick,MODS
+bcolla,coverage,"<subject displayLabel=""Coverage""><temporal>%coverage%</temporal></subject>"
+bcolla,creator,"<name><namePart>%creator%</namePart><role><roleTerm authority=""marcrelator"" type=""text"">creator</roleTerm></role></name>"
+bcolla,date,<originInfo><dateCreated>%date%</dateCreated></originInfo>
+bcollb,description,"<abstract displayLabel=""Description"" type=""content"">%description%</abstract>"

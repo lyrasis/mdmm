@@ -37,9 +37,10 @@ module Mdmm
     private
 
     def compile_result
-      #if there is no parsed date, return @orig as keydate, no encoding, no point. Include qualifier if present
+      #if there is no parsed date, return @orig, no keyDate, no encoding, no point. Include qualifier if present
+      # no keyDate because if we can't parse the date, it's unlikely it's going to behave well for searching, etc.
       if @parsed.empty?
-        r = "#{orig}&&&keyDate=yes"
+        r = "#{orig}"
         r << "&&&qualifier=#{@qualifier}" unless @qualifier.empty?
         @result << r
         # if there is one or more parsed values...
@@ -63,7 +64,7 @@ module Mdmm
           r << "&&&qualifier=#{@qualifier}" unless @qualifier.empty?
           @result << r
           # return the second parsed value as with encoding and point point (and qualifier, if present)
-          r = "#{parsed[0]}&&&encoding=#{@encoding}&&&point=end"
+          r = "#{parsed[1]}&&&encoding=#{@encoding}&&&point=end"
           r << "&&&qualifier=#{@qualifier}" unless @qualifier.empty?
           @result << r
         end
@@ -77,7 +78,13 @@ module Mdmm
         @encoding << 'w3cdtf'
         # MM-DD-YYYY
       elsif val.match?(/^\d{1,2}-\d{1,2}-\d{4}$/)
-        parse(val)
+        m = val.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/)
+        month = "%02d" % m[1]
+        day = "%02d" % m[2]
+        formatted = "#{m[3]}-#{month}-#{day}"
+        @parsed << formatted
+        @encoding << 'w3cdtf'
+        Mdmm::LOG.debug("DATEPROCESSING: #{recid}: MM-DD-YYYY fix: #{val} --> #{formatted}")
         # YYYY Month DD
       elsif val.match?(/^\d{4} \w+ \d{1,2}$/)
         parse(val)
@@ -98,10 +105,7 @@ module Mdmm
         @parsed << formatted
         @encoding << 'w3cdtf'
         Mdmm::LOG.debug("DATEPROCESSING: #{recid}: mMM YYYY fix: #{val} --> #{formatted}")
-        # M-D-YYYY or MM-DD-YYYY
-      elsif val.match?(/^\d{1,2}-\d{1,2}-\d{4}$/)
-        parse_by_pattern('%m-%d-%Y')
-        # M/D/YYYY or MM/DD/YYYY  
+      #  # M/D/YYYY or MM/DD/YYYY  
       elsif val.match?(/^\d{1,2}\/\d{1,2}\/\d{4}$/)
         parse_by_pattern('%m/%d/%Y')
       end
@@ -195,10 +199,10 @@ module Mdmm
         date_handler("#{m[1]} #{m[2]} #{m[3]}")
         date_handler("#{m[1]} #{m[2]} #{m[4]}")
         # Month DD-DD, YYYY
-      elsif @working.match?(/^[A-Za-z]+ \d{1,2}-\d{1,2},? \d{4}$/)
+      elsif @working.match?(/^[A-Za-z]+ \d{1,2} *- *\d{1,2},? \d{4}$/)
         yr = @working.match(/(\d{4})/)[1]
         m = @working.match(/^([A-Za-z]+)/)[1]
-        days = @working.match(/(\d{1,2}-\d{1,2})/)[1].split('-')
+        days = @working.match(/(\d{1,2} *- *\d{1,2})/)[1].split(/ *- */)
         date_handler("#{yr} #{m} #{days[0]}")
         date_handler("#{yr} #{m} #{days[1]}")
         # Month DD-Month DD, YYYY
@@ -212,33 +216,28 @@ module Mdmm
         date_handler("#{m[1]} #{m[2]} #{m[3]}")
         date_handler("#{m[1]} #{m[4]} #{m[5]}")
         # YYYY Month-Month
-      elsif @working.match?(/^\d{4} [A-Za-z]+-[A-Za-z]+$/)
-        arr = @working.split('-')
+      elsif @working.match?(/^\d{4} [A-Za-z]+ *- *[A-Za-z]+$/)
+        arr = @working.split(/ *- */)
         date_handler(substitute_numeric_months(arr[0]))
         year = @working.match(/^(\d{4})/)[1]
         date_handler(substitute_numeric_months("#{year} #{arr[1]}"))
         # Month-Month YYYY
-      elsif @working.match?(/^[A-Za-z]+-[A-Za-z]+ \d{4}$/)
+      elsif @working.match?(/^[A-Za-z]+ *- *[A-Za-z]+ \d{4}$/)
         w = substitute_numeric_months(@working)
-        m = w.match(/^(m\d{2})-(m\d{2}) (\d{4})$/)
+        m = w.match(/^(m\d{2}) *- *(m\d{2}) (\d{4})$/)
         date_handler("#{m[3]} #{m[1]}")
         date_handler("#{m[3]} #{m[2]}")
         # YYYY Month DD-YYYY Month DD
-      elsif @working.match?(/^\d{4} [A-Za-z]+ \d{1,2}-\d{4} [A-Za-z]+ \d{1,2}$/)
-        @working.split('-').each{ |d| date_handler(d) }
+      elsif @working.match?(/^\d{4} [A-Za-z]+ \d{1,2} *- *\d{4} [A-Za-z]+ \d{1,2}$/)
+        @working.split(/ *- */).each{ |d| date_handler(d) }
         # YYYY Month DD (non letters) and DD
-      elsif @working.match?(/^\d{4} [A-Za-z]+ \d{1,2}[^A-Za-z]+ and \d{1,2}/)
-        m = @working.match(/^(\d{4} [A-Za-z]+) (\d{1,2})[^A-Za-z]+and (\d{1,2})/)
+      elsif @working.match?(/^\d{4} [A-Za-z]+ \d{1,2}[^A-Za-z]+ *(and |)\d{1,2}$/)
+        m = @working.match(/^(\d{4} [A-Za-z]+) (\d{1,2})[^A-Za-z]+ *(and |)(\d{1,2})$/)
         date_handler("#{m[1]} #{m[2]}")
-        date_handler("#{m[1]} #{m[3]}")
+        date_handler("#{m[1]} #{m[4]}")
         # YYYY-MM-00-YYYY-MM-00
-      elsif @working.match?(/^\d{4}-\d{1,2}-0{1,2}-\d{4}-\d{1,2}-0{1,2}$/)
-        m = @working.match(/^(\d{4}-\d{1,2})-0{1,2}-(\d{4}-\d{1,2})-0{1,2}$/)
-        date_handler(m[1])
-        date_handler(m[2])
-        # YYYY-MM-00-YYYY-MM-00
-      elsif @working.match?(/^\d{4}-\d{1,2}-\d{1,2}-\d{4}-\d{1,2}-\d{1,2}$/)
-        m = @working.match(/^(\d{4}-\d{1,2}-\d{1,2})-(\d{4}-\d{1,2}-\d{1,2})$/)
+      elsif @working.match?(/^\d{4}-\d{1,2}-0{1,2} *- *\d{4}-\d{1,2}-0{1,2}$/)
+        m = @working.match(/^(\d{4}-\d{1,2})-0{1,2} *- *(\d{4}-\d{1,2})-0{1,2}$/)
         date_handler(m[1])
         date_handler(m[2])
       end

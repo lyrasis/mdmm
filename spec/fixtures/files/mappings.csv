@@ -1,0 +1,93 @@
+coll alias,nick,MODS
+acoll1,contributor,"<name><namePart>%contributor%</namePart><role><roleTerm authority=""marcrelator"" type=""text"">contributor</roleTerm></role></name>"
+acoll1,coverage,"<subject displayLabel=""Coverage""><temporal>%coverage%</temporal></subject>"
+acoll1,creator,"<name><namePart>%creator%</namePart><role><roleTerm authority=""marcrelator"" type=""text"">creator</roleTerm></role></name>"
+acoll1,date,<originInfo><dateCreated>%date%</dateCreated></originInfo>
+acoll1,description,"<abstract displayLabel=""Description"" type=""content"">%description%</abstract>"
+acoll1,format,"<physicalDescription><form type=""original"">%format%</form></physicalDescription>"
+acoll1,identifier,"<identifier type=""Site digital object identifier"">%identifier%</identifier>"
+acoll1,language,"<language><languageTerm type=""text"">%language%</languageTerm></language>"
+acoll1,mimetype,<physicalDescription><internetMediaType>%mimetype%</internetMediaType></physicalDescription>
+acoll1,physicallocation,"<location><physicalLocation type=""text>%physicallocation%</physicalLocation></location>"
+acoll1,publisher,"<note displayLabel=""Digitized and published online by"" type=""action"">%publisher%</note>"
+acoll1,recsourceorg,"<recordInfo><recordContentSource authority=""marcorg"">%recsourceorg%</recordContentSource><recordOrigin>Mapped from %sourcesystem% to MODS by LYRASIS staff with input from and approval of Angela Kroeger, %insertcurrentdate%</recordOrigin></recordInfo>"
+acoll1,relatedcollectionlink,"<relatedItem type=""host""><typeOfResource collection=""yes"" /><titleInfo><title>%relatedcollectiontitle%</title></titleInfo><location><url displayLabel=""%relatedcollectionlinktype%"">%relatedcollectionlink%</url></location></relatedItem>"
+acoll1,relatedcollectionlinktype,"<relatedItem type=""host""><typeOfResource collection=""yes"" /><titleInfo><title>%relatedcollectiontitle%</title></titleInfo><location><url displayLabel=""%relatedcollectionlinktype%"">%relatedcollectionlink%</url></location></relatedItem>"
+acoll1,relatedcollectiontitle,"<relatedItem type=""host""><typeOfResource collection=""yes"" /><titleInfo><title>%relatedcollectiontitle%</title></titleInfo><location><url displayLabel=""%relatedcollectionlinktype%"">%relatedcollectionlink%</url></location></relatedItem>"
+acoll1,relfolderlink,"<relatedItem type=""host""><titleInfo><title>%relfoldertitle%</title></titleInfo><location><url displayLabel=""%relfoldertitle%"">%relfolderlink%</url></location></relatedItem>"
+acoll1,relfoldertitle,"<relatedItem type=""host""><titleInfo><title>%relfoldertitle%</title></titleInfo><location><url displayLabel=""%relfoldertitle%"">%relfolderlink%</url></location></relatedItem>"
+acoll1,relitemlink,"<relatedItem type=""otherVersion""><titleInfo><title>%relitemtitle%</title></titleInfo><location><url displayLabel=""%relitemtitle%"">%relitemlink%</url></location></relatedItem>"
+acoll1,relitemtitle,"<relatedItem type=""otherVersion""><titleInfo><title>%relitemtitle%</title></titleInfo><location><url displayLabel=""%relitemtitle%"">%relitemlink%</url></location></relatedItem>"
+acoll1,relserieslink,"<relatedItem type=""series""><titleInfo><title>%relseriestitle%</title></titleInfo><location><url displayLabel=""%relseriestitle%"">%relserieslink%</url></location></relatedItem>"
+acoll1,relseriestitle,"<relatedItem type=""series""><titleInfo><title>%relseriestitle%</title></titleInfo><location><url displayLabel=""%relseriestitle%"">%relserieslink%</url></location></relatedItem>"
+acoll1,sourcesystem,"<recordInfo><recordContentSource authority=""marcorg"">%recsourceorg%</recordContentSource><recordOrigin>Mapped from %sourcesystem% to MODS by LYRASIS staff with input from and approval of Metadata Librarian, %insertcurrentdate%</recordOrigin></recordInfo>"
+acoll1,subject,<subject><topic>%subject%</topic></subject>
+acoll1,title,"<titleInfo><title usage=""primary"">%title%</title></titleInfo>"
+acoll1,type,<typeOfResource>%type%</typeOfResource>
+acoll2,author,"<name><namePart>%author%</namePart><role><roleTerm authority=""marcrelator"" type=""text"">author</roleTerm></role></name>"
+acoll2,creato,"<abstract displayLabel=""Description"" type=""content"">%creato%</abstract>"
+acoll2,date,<extension><drs:admin><drs:captureDate>%date%</drs:captureDate></drs:admin></extension>
+acoll2,formaa,<physicalDescription><internetMediaType>%formaa%</internetMediaType></physicalDescription>
+acoll2,format,"<physicalDescription><form type=""original"">%format%</form></physicalDescription>"
+acoll2,identi,"<identifier type=""Site digital object identifier"">%identi%</identifier>"
+acoll2,publia,"<note displayLabel=""Digitized and published online by"" type=""action"">%publia%</note>"
+acoll2,publis,<originInfo><dateCreated>%publis%</dateCreated></originInfo>
+acoll2,recsourceorg,"<recordInfo><recordContentSource authority=""marcorg"">%recsourceorg%</recordContentSource><recordOrigin>Mapped from %sourcesystem% to MODS by LYRASIS staff with input from and approval of Metadata Librarian, %insertcurrentdate%</recordOrigin></recordInfo>"
+acoll2,reposa,"<location><physicalLocation authority=""marcorg"" type=""code"">NbOU</physicalLocation><physicalLocation type=""text"">%reposi%. %reposa%</physicalLocation></location>"
+acoll2,reposi,"<location><physicalLocation authority=""marcorg"" type=""code"">NbOU</physicalLocation><physicalLocation type=""text"">%reposi%</physicalLocation></location>"
+acoll2,sourcesystem,"<recordInfo><recordContentSource authority=""marcorg"">%recsourceorg%</recordContentSource><recordOrigin>Mapped from %sourcesystem% to MODS by LYRASIS staff with input from and approval of Metadata Librarian, %insertcurrentdate%</recordOrigin></recordInfo>"
+acoll2,subjea,<subject><topic>%subjea%</topic></subject>
+acoll2,title,"<titleInfo><title usage=""primary"">%title%</title></titleInfo>"
+acoll2,transc,"<note type=""transcript"">%transc%</note>"
+acoll2,type,<typeOfResource>%type%</typeOfResource>
+acoll3,author,"<name><namePart>%author%</namePart><role><roleTerm authority=""marcrelator"" type=""text"">creator</roleTerm></role></name>"
+acoll3,creato,"<note displayLabel=""Description"" type=""content"">%creato%</note>"
+acoll3,date,<extension><drs:admin><drs:captureDate>%date%</drs:captureDate></drs:admin></extension>
+acoll3,formaa,<physicalDescription><internetMediaType>%formaa%</internetMediaType></physicalDescription>
+acoll3,format,"<physicalDescription><form type=""original"">%format%</form></physicalDescription>"
+acoll3,fullrs,"<note displayLabel=""Archival file"" type=""staff"">%fullrs%</note>"
+acoll3,hostcolllink,"<relatedItem type=""host""><typeOfResource collection=""yes"" /><titleInfo><title>%hostcolltitle%</title></titleInfo><location><url displayLabel=""Finding aid"">%hostcolllink%</url></location></relatedItem>"
+acoll3,hostcolltitle,"<relatedItem type=""host""><typeOfResource collection=""yes"" /><titleInfo><title>%relatedcollectiontitle%</title></titleInfo><location><url displayLabel=""%relatedcollectionlinktype%"">%relatedcollectionlink%</url></location></relatedItem>"
+acoll3,hostnolink,"<relatedItem type=""host""><typeOfResource collection=""yes"" /><titleInfo><title>%hostnolink%</title></titleInfo></relatedItem>"
+acoll3,publia,"<note displayLabel=""Digitized and published online by"" type=""action"">%publia%</note>"
+acoll3,publis,<originInfo><dateCreated>%publis%</dateCreated></originInfo>
+acoll3,recsourceorg,"<recordInfo><recordContentSource authority=""marcorg"">%recsourceorg%</recordContentSource><recordOrigin>Mapped from %sourcesystem% to MODS by LYRASIS staff with input from and approval of Metadata Librarian, %insertcurrentdate%</recordOrigin></recordInfo>"
+acoll3,reposi,"<location><physicalLocation authority=""marcorg"" type=""code"">NbOU</physicalLocation><physicalLocation type=""text"">%reposi%</physicalLocation></location>"
+acoll3,sourcesystem,"<recordInfo><recordContentSource authority=""marcorg"">%recsourceorg%</recordContentSource><recordOrigin>Mapped from %sourcesystem% to MODS by LYRASIS staff with input from and approval of Metadata Librarian, %insertcurrentdate%</recordOrigin></recordInfo>"
+acoll3,subjea,<subject><topic>%subjea%</topic></subject>
+acoll3,title,"<titleInfo><title usage=""primary"">%title%</title></titleInfo>"
+acoll3,type,<typeOfResource>%type%</typeOfResource>
+bcolla,author,"<name><namePart>%author%</namePart><role><roleTerm authority=""marcrelator"" type=""text"">creator</roleTerm></role></name>"
+bcolla,creato,"<abstract displayLabel=""Description"" type=""content"">%creato%</abstract>"
+bcolla,date,<extension><drs:admin><drs:captureDate>%date%</drs:captureDate></drs:admin></extension>
+bcolla,formaa,<physicalDescription><internetMediaType>%formaa%</internetMediaType></physicalDescription>
+bcolla,format,"<physicalDescription><form type=""original"">%format%</form></physicalDescription>"
+bcolla,hostcolllink,"<relatedItem type=""host""><typeOfResource collection=""yes"" /><titleInfo><title>%hostcolltitle%</title></titleInfo><location><url displayLabel=""Finding aid"">%hostcolllink%</url></location></relatedItem>"
+bcolla,hostcolltitle,"<relatedItem type=""host""><typeOfResource collection=""yes"" /><titleInfo><title>%relatedcollectiontitle%</title></titleInfo><location><url displayLabel=""%relatedcollectionlinktype%"">%relatedcollectionlink%</url></location></relatedItem>"
+bcolla,publia,"<note displayLabel=""Digitized and published online by"" type=""action"">%publia%</note>"
+bcolla,publis,<originInfo><dateCreated>%publis%</dateCreated></originInfo>
+bcolla,recsourceorg,"<recordInfo><recordContentSource authority=""marcorg"">%recsourceorg%</recordContentSource><recordOrigin>Mapped from %sourcesystem% to MODS by LYRASIS staff with input from and approval of Metadata Librarian, %insertcurrentdate%</recordOrigin></recordInfo>"
+bcolla,reposi,"<location><physicalLocation authority=""marcorg"" type=""code"">NbOU</physicalLocation><physicalLocation type=""text"">%reposi%</physicalLocation></location>"
+bcolla,resour,"<identifier type=""Site digital object identifier"">%resour%</identifier>"
+bcolla,sourcesystem,"<recordInfo><recordContentSource authority=""marcorg"">%recsourceorg%</recordContentSource><recordOrigin>Mapped from %sourcesystem% to MODS by LYRASIS staff with input from and approval of Metadata Librarian, %insertcurrentdate%</recordOrigin></recordInfo>"
+bcolla,subjea,<subject><topic>%subjea%</topic></subject>
+bcolla,title,"<titleInfo><title usage=""primary"">%title%</title></titleInfo>"
+bcolla,transc,"<note type=""transcript"">%transc%</note>"
+bcolla,type,<typeOfResource>%type%</typeOfResource>
+bcollb,author,"<name><namePart>%author%</namePart><role><roleTerm authority=""marcrelator"" type=""text"">creator</roleTerm></role></name>"
+bcollb,creato,"<abstract displayLabel=""Description"" type=""content"">%creato%</abstract>"
+bcollb,date,<extension><drs:admin><drs:captureDate>%date%</drs:captureDate></drs:admin></extension>
+bcollb,formaa,<physicalDescription><internetMediaType>%formaa%</internetMediaType></physicalDescription>
+bcollb,format,"<physicalDescription><form type=""original"">%format%</form></physicalDescription>"
+bcollb,hostcolllink,"<relatedItem type=""host""><typeOfResource collection=""yes"" /><titleInfo><title>%hostcolltitle%</title></titleInfo><location><url displayLabel=""Finding aid"">%hostcolllink%</url></location></relatedItem>"
+bcollb,hostcolltitle,"<relatedItem type=""host""><typeOfResource collection=""yes"" /><titleInfo><title>%relatedcollectiontitle%</title></titleInfo><location><url displayLabel=""%relatedcollectionlinktype%"">%relatedcollectionlink%</url></location></relatedItem>"
+bcollb,publia,"<note displayLabel=""Digitized and published online by"" type=""action"">%publia%</note>"
+bcollb,publis,<originInfo><dateCreated>%publis%</dateCreated></originInfo>
+bcollb,recsourceorg,"<recordInfo><recordContentSource authority=""marcorg"">%recsourceorg%</recordContentSource><recordOrigin>Mapped from %sourcesystem% to MODS by LYRASIS staff with input from and approval of Metadata Librarian, %insertcurrentdate%</recordOrigin></recordInfo>"
+bcollb,reposi,"<location><physicalLocation authority=""marcorg"" type=""code"">NbOU</physicalLocation><physicalLocation type=""text"">%reposi%</physicalLocation></location>"
+bcollb,resour,"<identifier type=""Site digital object identifier"">%resour%</identifier>"
+bcollb,sourcesystem,"<recordInfo><recordContentSource authority=""marcorg"">%recsourceorg%</recordContentSource><recordOrigin>Mapped from %sourcesystem% to MODS by LYRASIS staff with input from and approval of Metadata Librarian, %insertcurrentdate%</recordOrigin></recordInfo>"
+bcollb,subjea,<subject><topic>%subjea%</topic></subject>
+bcollb,title,"<titleInfo><title usage=""primary"">%title%</title></titleInfo>"
+bcollb,transc,"<note type=""transcript"">%transc%</note>"
+bcollb,type,<typeOfResource>%type%</typeOfResource>

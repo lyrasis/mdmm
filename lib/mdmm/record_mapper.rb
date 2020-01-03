@@ -3,6 +3,7 @@ require 'mdmm'
 module Mdmm
   class RecordMapper
     attr_reader :coll
+    attr_reader :rec
     attr_reader :orig
     attr_reader :id
     attr_reader :mappings
@@ -10,9 +11,10 @@ module Mdmm
     attr_reader :elements
 	
     def initialize(cleanrec)
-      @coll = cleanrec.coll
-      @orig = cleanrec.json
-      @id = cleanrec.id
+      @rec = cleanrec
+      @coll = @rec.coll
+      @orig = @rec.json
+      @id = @rec.id
       Mdmm::LOG.debug("MODSMAPPINGS: #{@coll.name}/#{@id}: starting mapping of record")
       @mappings = Mdmm::CONFIG.mappings[@coll.name].uniq
       @mods = base_mods
@@ -29,32 +31,55 @@ module Mdmm
     end
 
     def do_mappings
-      @mappings.each{ |mapping|
-        Mdmm::LOG.debug("MODSMAPPINGS: #{@coll.name}/#{@id}: starting mapping: #{mapping}")
-        #pp(mapping)
-        to_map = mapping.scan(/%[^%]+%/)
-        #pp(to_map)
-        
-        insert_current_date if to_map.include?('%insertcurrentdate%')
-        
-        case to_map.length
-        when 1
-          field = to_map[0]
-          simple_mapping(field, mapping) if field_present?(field) && !Mdmm.date_field?(field.delete('%'))
-          simple_date_mapping(field, mapping) if field_present?(field) && Mdmm.date_field?(field.delete('%'))
+      @mappings.each{ |m|
+        Mdmm::LOG.debug("MODSMAPPINGS: #{@coll.name}/#{@id}: starting mapping: #{m}")
+        insert_current_date if m['%insertcurrentdate%']
+        mapping = m.include?(';;;') ? Mdmm::MappingChooser.new(m, @orig).mapping : m
+
+        if mapping.nil?
+          Mdmm::LOG.warn("MODSMAPPINGS: #{@coll.name}/#{@id}: No usable mapping in #{m}")
         else
-          chk = check_multivals(to_map)
-          case chk
-          when 'single'
-            @elements << complex_single_val_mapping(to_map, mapping)
-          when 'multi even'
-            Mdmm::LOG.warn("MODSMAPPINGS: #{@coll.name}/#{@id}: cannot map ``multi even`` mapping: #{mapping}")
-          when 'multi uneven'
-            Mdmm::LOG.warn("MODSMAPPINGS: #{@coll.name}/#{@id}: cannot map ``multi uneven`` mapping: #{mapping}")
-          when 'missing field'
-            Mdmm::LOG.warn("MODSMAPPINGS: #{@coll.name}/#{@id}: cannot map ``missing field`` mapping: #{mapping}")
+          chk = MappingChecker.new(@orig, mapping)
+          if chk.missingfield
+            Mdmm::LOG.info("MODSMAPPINGS: #{@coll.name}/#{@id}: skipping ``missing fields`` mapping: #{mapping}")
+            next
           end
+          if chk.multifield && !chk.even
+            Mdmm::LOG.warn("MODSMAPPINGS: #{@coll.name}/#{@id}: cannot map ``multi uneven`` mapping: #{mapping}")
+            next
+          end
+          if chk.multifield && chk.dates
+            Mdmm::LOG.warn("MODSMAPPINGS: #{@coll.name}/#{@id}: cannot map ``multi-field date`` mapping: #{mapping}")
+            next
+          end
+          if !chk.multifield && !chk.dates
+            Mdmm::SingleFieldMapper.new(@orig, mapping).modselements.each{ |e| @elements << e }
+            Mdmm::LOG.debug("MODSMAPPINGS: #{@coll.name}/#{@id}: finished ``simple`` mapping: #{mapping}")
+          end
+          
         end
+
+        
+        
+        # case to_map.length
+        # when 1
+        #   field = to_map[0]
+        #   simple_mapping(field, mapping) if @rec.has_field?(field.delete('%')) && !Mdmm.date_field?(field.delete('%'))
+        #   simple_date_mapping(field, mapping) if @rec.has_field?(field.delete('%')) && Mdmm.date_field?(field.delete('%'))
+        # else
+        #   chk = check_multivals(to_map)
+        #   case chk
+        #   when 'single'
+        #     @elements << complex_single_val_mapping(to_map, mapping)
+        #   when 'all fields missing'
+        #     Mdmm::LOG.info("MODSMAPPINGS: #{@coll.name}/#{@id}: skipping ``all fields missing`` mapping: #{mapping}")
+        #   when 'multi even'
+        #     Mdmm::LOG.warn("MODSMAPPINGS: #{@coll.name}/#{@id}: cannot map ``multi even`` mapping: #{mapping}")
+        #   when 'multi uneven'
+        #   when 'missing field'
+        #     Mdmm::LOG.warn("MODSMAPPINGS: #{@coll.name}/#{@id}: cannot map ``missing field`` mapping: #{mapping}")
+        #   end
+        # end
       }
     end
 
@@ -79,7 +104,7 @@ module Mdmm
     def check_multivals(to_map)
       lengths = {}
       to_map.each{ |field|
-        if field_present?(field)
+        if @rec.has_field?(field.delete('%'))
           ln = @orig[field.delete('%')].split(';;;').length
           lengths[ln] = ''
         else
@@ -87,11 +112,11 @@ module Mdmm
         end
       }
       lengths = lengths.keys
-      result = 'single' if lengths == [1]
-      result = 'multi even' if lengths.length == 1 && lengths != [1]
-      result = 'missing field' if lengths.include?(0) && lengths.length > 1
-      result = 'multi uneven' if !lengths.include?(0) && lengths.length > 1
-      result
+      return 'single' if lengths == [1]
+      return 'all fields missing' if lengths.length == 1 && lengths == [0]
+      return 'multi even' if lengths.length == 1 && lengths != [1]
+      return 'missing field' if lengths.include?(0) && lengths.length > 1
+      return 'multi uneven' if !lengths.include?(0) && lengths.length > 1
     end
 
     def simple_date_mapping(field, mapping)
@@ -158,12 +183,6 @@ module Mdmm
       }
     end
 
-    def field_present?(field)
-      field = field.delete('%')
-      return true if @orig[field]
-    end
-
-    
     def base_mods
       s = '<?xml version="1.0"?><mods xmlns="http://www.loc.gov/mods/v3" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:drs="http://www.lyrasis.org/drs"></mods>'
       Nokogiri::XML(s)
@@ -174,9 +193,6 @@ module Mdmm
       File.write(path, @mods.to_xml)
     end
 
-    def get_top_level_xml_fieldname(mapping)
-      mapping.match(/^<([^ >]+)/)[1]
-    end
     
   end #RecordMapper
 end #Module

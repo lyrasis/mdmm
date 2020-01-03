@@ -37,8 +37,8 @@ module Mdmm
     map %w[--config -c] => :__config
     desc '--config, -c', 'print out your config settings, including list of site names'
     def __config
-      puts "\nYour project working directory:"
-      puts Mdmm::WRK_DIR
+      puts "\nYour project working directories:"
+      puts Mdmm::CONFIG.wrk_dirs
       puts "\nLogfile path:"
       puts Mdmm::CONFIG.logfile
       puts "\nField prefixes ignored in reporting:"

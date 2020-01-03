@@ -38,7 +38,8 @@ module Mdmm
         'derive_fields',
         'extractions',
         'replacements',
-        'cross_multival_replacements'
+        'cross_multival_replacements',
+        'single_mods_top_elements'
       ].each{ |atr|
         self.class.instance_eval{ attr_reader atr.to_sym }
         instance_variable_set("@#{atr}", [])

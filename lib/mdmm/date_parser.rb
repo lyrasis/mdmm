@@ -41,31 +41,31 @@ module Mdmm
       # no keyDate because if we can't parse the date, it's unlikely it's going to behave well for searching, etc.
       if @parsed.empty?
         r = "#{orig}"
-        r << "&&&qualifier=#{@qualifier}" unless @qualifier.empty?
+        r << "^^^qualifier=#{@qualifier}" unless @qualifier.empty?
         @result << r
         # if there is one or more parsed values...
       else
         # if there one parsed value... 
         if @parsed.length == 1
           # if there's a qualifier, return orig version first as display value, with qualifier
-          @result << "#{orig}&&&qualifier=#{@qualifier}" if !@qualifier.empty?
+          @result << "#{orig}^^^qualifier=#{@qualifier}" if !@qualifier.empty?
           # return the parsed value as key date with encoding (and qualifier, if present)
-          r = "#{parsed[0]}&&&encoding=#{@encoding}&&&keyDate=yes"
-          r << "&&&qualifier=#{@qualifier}" unless @qualifier.empty?
+          r = "#{parsed[0]}^^^encoding=#{@encoding}^^^keyDate=yes"
+          r << "^^^qualifier=#{@qualifier}" unless @qualifier.empty?
           @result << r
           # if there are two parsed values
         else
           # return orig for display, adding qualifier if present
           r = "#{orig}"
-          r << "&&&qualifier=#{@qualifier}" unless @qualifier.empty?
+          r << "^^^qualifier=#{@qualifier}" unless @qualifier.empty?
           @result << r
           # return the first parsed value as key date with encoding and start point (and qualifier, if present)
-          r = "#{parsed[0]}&&&encoding=#{@encoding}&&&keyDate=yes&&&point=start"
-          r << "&&&qualifier=#{@qualifier}" unless @qualifier.empty?
+          r = "#{parsed[0]}^^^encoding=#{@encoding}^^^keyDate=yes^^^point=start"
+          r << "^^^qualifier=#{@qualifier}" unless @qualifier.empty?
           @result << r
           # return the second parsed value as with encoding and point point (and qualifier, if present)
-          r = "#{parsed[1]}&&&encoding=#{@encoding}&&&point=end"
-          r << "&&&qualifier=#{@qualifier}" unless @qualifier.empty?
+          r = "#{parsed[1]}^^^encoding=#{@encoding}^^^point=end"
+          r << "^^^qualifier=#{@qualifier}" unless @qualifier.empty?
           @result << r
         end
       end

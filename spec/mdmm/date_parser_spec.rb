@@ -203,15 +203,15 @@ RSpec.describe Mdmm::DateParser do
     context 'WHEN .parsed.length == 1...' do
       context 'AND no qualifier' do
       it "returns parsed date as keyDate" do
-        expect(d3.result).to eq(['1997-12-18&&&encoding=w3cdtf&&&keyDate=yes'])
+        expect(d3.result).to eq(['1997-12-18^^^encoding=w3cdtf^^^keyDate=yes'])
       end
       end
       context 'AND qualifier' do
         it "returns original value with qualifier first..." do
-          expect(d2.result[0]).to eq('circa 1997&&&qualifier=approximate')
+          expect(d2.result[0]).to eq('circa 1997^^^qualifier=approximate')
         end
         it "...followed by first parsed value as keyDate with qualifier" do
-          expect(d2.result[1]).to eq('1997&&&encoding=w3cdtf&&&keyDate=yes&&&qualifier=approximate')
+          expect(d2.result[1]).to eq('1997^^^encoding=w3cdtf^^^keyDate=yes^^^qualifier=approximate')
         end
       end
 
@@ -222,10 +222,10 @@ RSpec.describe Mdmm::DateParser do
         expect(d1.result[0]).to eq('1997-1998')
       end
       it "...followed by first parsed value as keyDate and start..." do
-        expect(d1.result[1]).to eq('1997&&&encoding=w3cdtf&&&keyDate=yes&&&point=start')
+        expect(d1.result[1]).to eq('1997^^^encoding=w3cdtf^^^keyDate=yes^^^point=start')
       end
       it "...followed by second parsed value as end..." do
-        expect(d1.result[2]).to eq('1998&&&encoding=w3cdtf&&&point=end')
+        expect(d1.result[2]).to eq('1998^^^encoding=w3cdtf^^^point=end')
       end
     end
   end # describe ".result" do

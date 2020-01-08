@@ -94,11 +94,7 @@ module Mdmm
       @modselements << origininfo
     end
   end #OrigininfoDateFieldMapper
-
     
-
-
-
   # handles mappings involving a single, non-date field. The field may have multiple values or not.
   class SingleFieldMapper < Mapper
     def initialize(rec, mapping)

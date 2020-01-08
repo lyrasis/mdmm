@@ -42,3 +42,10 @@ mappings: ~/code/mdmm/spec/fixtures/files/briefmappings.csv
 date_fields:
   - 'date'
   - 'publis'
+
+# the following MODS elements will be collapsed so that all children occur within one parent instance of the element
+single_mods_top_elements:
+  - extension
+  - originInfo
+  - physicalDescription
+

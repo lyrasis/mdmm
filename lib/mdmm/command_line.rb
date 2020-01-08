@@ -136,5 +136,25 @@ FORMAT: report format. `exploded` produces csv with one row per field per record
         coll.map_records
       }
     end
+
+    desc 'validate_mods', 'copies mods directory for each collection to a given directory, for sending to client'
+    option :coll, :desc => 'comma-separated list of coll names to include in processing', :default => ''
+    def validate_mods
+      colls = get_colls
+      colls.each{ |coll|
+        coll.validate_mods
+      }
+    end
+
+    desc 'compile_mods', 'copies mods directory for each collection to a given directory, for sending to client'
+    option :coll, :desc => 'comma-separated list of coll names to include in processing', :default => ''
+    option :path, :desc => 'path to directory in which to save collection MODS directories'
+    def compile_mods
+      colls = get_colls
+      colls.each{ |coll|
+        coll.compile_mods(options[:path])
+      }
+    end
+
   end # CommandLine
 end # Mdmm

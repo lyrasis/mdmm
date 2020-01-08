@@ -1,6 +1,7 @@
 # standard library
 require 'csv'
 require 'date'
+require 'fileutils'
 require 'json'
 require 'logger'
 require 'pp'
@@ -39,8 +40,8 @@ module Mdmm
   require 'mdmm/mapping_chooser'
   require 'mdmm/mapping_checker'
   require 'mdmm/mapper'
-
-
+  require 'mdmm/mods_element_consolidator'
+  require 'mdmm/mods_element_orderer'
   # -=-=-
   # Utility methods used across classes/etc
   # -=-=-

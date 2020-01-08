@@ -21,7 +21,8 @@ module Mdmm
       @elements = []
       escape_characters
       do_mappings
-      @elements = ModsElementConsolidator.new(@elements) unless Mdmm::CONFIG.single_mods_top_elements.empty?
+      @elements = ModsElementConsolidator.new(@elements).result unless Mdmm::CONFIG.single_mods_top_elements.empty?
+      @elements = ModsElementOrderer.new(@elements).result
       build_doc
       write_doc
     end

@@ -46,7 +46,7 @@ module Mdmm
       }
       date_fields.each{ |field, value|
           d = Mdmm::DateParser.new("#{coll.name}/#{id}", value).result
-          @working["#{field}_cleaned"] = d.join(';;;')
+          @working["#{field}_cleaned"] = d.join(Mdmm::CONFIG.multivalue_delimiter)
       }
     end
     
@@ -55,13 +55,13 @@ module Mdmm
         if applies_to_coll?(config)
           fieldname = config['field']
           if @working[fieldname]
-            fieldval = @working[fieldname].split(';;;')
+            fieldval = @working[fieldname].split(Mdmm::CONFIG.multivalue_delimiter)
           else
             fieldval = []
           end
 
           fieldval << config['value']
-          @working[fieldname] = fieldval.join(';;;')
+          @working[fieldname] = fieldval.join(Mdmm::CONFIG.multivalue_delimiter)
         end
       }
     end
@@ -84,7 +84,7 @@ module Mdmm
         if applies_to_coll?(config)
           @working.each{ |field, value|
             if applies_to_field?(config, field)
-              if value.split(';;;').select{ |e| e.match?(config['condition']) }.length > 0
+              if value.split(Mdmm::CONFIG.multivalue_delimiter).select{ |e| e.match?(config['condition']) }.length > 0
                 to_remap << field
               end
             end
@@ -96,18 +96,18 @@ module Mdmm
 
     def add_field_value(newfieldname, value)
       if @working[newfieldname]
-        newfieldval = @working[newfieldname].split(';;;')
+        newfieldval = @working[newfieldname].split(Mdmm::CONFIG.multivalue_delimiter)
       else
         newfieldval = []
       end        
       newfieldval << value
-      @working[newfieldname] = newfieldval.join(';;;')
+      @working[newfieldname] = newfieldval.join(Mdmm::CONFIG.multivalue_delimiter)
     end
     
 
     def remap_fields(config, fieldnames)
       fieldnames.each { |fieldname|
-        exfieldval = @working[fieldname].split(';;;')
+        exfieldval = @working[fieldname].split(Mdmm::CONFIG.multivalue_delimiter)
         if config['moveto']
           exfieldval.select{ |e| e.match?(config['condition']) }.each { |val|
             add_field_value(config['moveto'], val)
@@ -123,7 +123,7 @@ module Mdmm
 
         if config['derivefield']
           exfieldval.select{ |e| e.match?(config['condition']) }.each { |val|
-            unless @working[config['derivefield']] && @working[config['derivefield']].split(';;;').include?(config['derivevalue'])
+            unless @working[config['derivefield']] && @working[config['derivefield']].split(Mdmm::CONFIG.multivalue_delimiter).include?(config['derivevalue'])
               add_field_value(config['derivefield'], config['derivevalue'])
               Mdmm::LOG.info("#{@coll.name}/#{@id}: Added derived field value ''#{config['derivevalue']}'' to #{config['derivefield']} because #{fieldname} value matched ''#{config['condition']}''")
             end
@@ -139,7 +139,7 @@ module Mdmm
         end
         
         if exfieldval.length > 0
-          @working[fieldname] = exfieldval.join(';;;')
+          @working[fieldname] = exfieldval.join(Mdmm::CONFIG.multivalue_delimiter)
         else
           @working.delete(fieldname)
         end
@@ -151,14 +151,14 @@ module Mdmm
         if applies_to_coll?(cc)
           @working.each{ |field, value|
             if applies_to_field?(cc, field)
-              vsplit = value.split(';;;')
+              vsplit = value.split(Mdmm::CONFIG.multivalue_delimiter)
               case cc['case']
               when 'upper'
                 result = vsplit.map{ |e| e.sub(/^(.)(.*)/){ $1.upcase << $2 } }
               when 'lower'
                 result = vsplit.map{ |e| e.sub(/^(.)(.*)/){ $1.downcase << $2 } }
               end
-              result = result.join(';;;')
+              result = result.join(Mdmm::CONFIG.multivalue_delimiter)
               @working[field] = result
               Mdmm::LOG.info("#{@coll.name}/#{@id}: Normalized case in #{field}: ''#{value}'' -> ''#{result}''") if value != result
             end
@@ -169,9 +169,9 @@ module Mdmm
     
     def whitespace_cleaner
       @working.each{ |field, val|
-        val = val.split(';;;')
+        val = val.split(Mdmm::CONFIG.multivalue_delimiter)
         cleaned = val.map{ |v| remove_whitespace(v) }
-        @working[field] = cleaned.join(';;;')
+        @working[field] = cleaned.join(Mdmm::CONFIG.multivalue_delimiter)
       }
     end
 
@@ -183,11 +183,11 @@ module Mdmm
     
     def compile_cleaned_record(ignored_fields)
       @working.each{ |field, value|
-        @cleaned[field] = value.split(';;;').uniq.reject{ |v| v.empty? }.join(';;;')
+        @cleaned[field] = value.split(Mdmm::CONFIG.multivalue_delimiter).uniq.reject{ |v| v.empty? }.join(Mdmm::CONFIG.multivalue_delimiter)
       }
       ignored_fields.each{ |field, value|
         v = value if value.is_a?(Hash)
-        v = value.join(';;;') if value.is_a?(Array)
+        v = value.join(Mdmm::CONFIG.multivalue_delimiter) if value.is_a?(Array)
         v = value if value.is_a?(String)
         @cleaned[field] = v
       }
@@ -223,7 +223,7 @@ module Mdmm
     end
 
     def do_replacement(sub, field, value, split)
-      vsplit = value.split(';;;') if split
+      vsplit = value.split(Mdmm::CONFIG.multivalue_delimiter) if split
       case sub['type']
       when 'plain'
         cleaned = vsplit.map{ |e| e.gsub(sub['find'], sub['replace']) } if split
@@ -234,7 +234,7 @@ module Mdmm
       else
         puts "No type given for REPLACEMENT (''#{sub['find']}'' -> ''#{sub['replace']}''"
       end
-      result = cleaned.join(';;;') if split
+      result = cleaned.join(Mdmm::CONFIG.multivalue_delimiter) if split
       result = cleaned if !split
       @working[field] = result
 

@@ -1,10 +1,9 @@
 RSpec.describe Mdmm::MigRecord do
-  let!(Mdmm::CONFIGPATH) { stub_const('Mdmm::CONFIGPATH', 'spec/fixtures/files/nearly_blank_config.yaml') }
 
   before do
-    stub_const('Mdmm::CONFIG', Mdmm::ConfigReader.new)
+    stub_const('Mdmm::CONFIG', Mdmm::ConfigReader.new('spec/fixtures/files/nearly_blank_config.yaml'))
   end
-  
+
   # omeka collection
   let(:coll1) { Collection.new(File.expand_path('spec/fixtures/testproject/systemb/bcolla')) }
   let(:rec1) { MigRecord.new(coll1, coll1.migrecs[0])  }

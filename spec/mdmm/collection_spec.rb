@@ -1,4 +1,8 @@
 RSpec.describe Mdmm::Collection do
+  before do
+    stub_const('Mdmm::CONFIG', Mdmm::ConfigReader.new('spec/fixtures/files/nearly_blank_config.yaml'))
+  end
+
   let(:c) { Collection.new(File.expand_path('spec/fixtures/testproject/systema/acoll2')) }
   describe ".new" do
     it "returns Mdmm::Collection object" do

@@ -9,6 +9,7 @@ module Mdmm
     attr_reader :modsdir # path to directory for MODS records
     attr_reader :migrecs #array of migration record filenames
     attr_reader :cleanrecs #array of clean record filenames
+    attr_reader :mappings #metadata mappings for this collection
 
     # Directories within WRK_DIR are identified as collections
     def initialize(colldir)
@@ -20,6 +21,7 @@ module Mdmm
       @modsdir = "#{@colldir}/_mods"
       Dir.mkdir(@modsdir) unless Dir::exist?(@modsdir)
       set_migrecs
+      @mappings = Mdmm::CONFIG.mappings[@name].uniq
       self
     end
 

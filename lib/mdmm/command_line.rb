@@ -2,6 +2,11 @@ require 'mdmm'
 
 module Mdmm
   class CommandLine < Thor
+    def initialize(*args)
+      super(*args)
+      Mdmm.const_set('CONFIG', Mdmm::ConfigReader.new(config: options[:config]))
+    end
+    
     no_commands{
       def get_colls
         colls = CONFIG.colls.map{ |cpath| Mdmm::Collection.new(cpath) }
@@ -27,6 +32,12 @@ module Mdmm
         end
       end #get_colls
     }
+
+    class_option :config,
+      desc: 'Path to YAML config file. If not specified, uses default value',
+      type: 'string',
+      default: 'config/config.yaml',
+      aliases: '-c'
     
     map %w[--version -v] => :__version
     desc '--version, -v', 'print the version'
@@ -34,15 +45,10 @@ module Mdmm
       puts "MDMM version #{Mdmm::VERSION}, installed #{File.mtime(__FILE__)}"
     end
 
-    map %w[--config -c] => :__config
-    desc '--config, -c', 'print out your config settings, including list of site names'
-    def __config
-      puts "\nYour project working directories:"
-      puts Mdmm::CONFIG.wrk_dirs
-      puts "\nLogfile path:"
-      puts Mdmm::CONFIG.logfile
-      puts "\nField prefixes ignored in reporting:"
-      puts Mdmm::CONFIG.reporting_ignore_field_prefixes
+    map %w[show_config -s] => :__show_config
+    desc 'show_config, -s', 'print out your config settings, including list of site names'
+    def __show_config
+      pp(Mdmm::CONFIG)
     end
 
     desc 'list_colls', 'list directories that will be treated as collections'

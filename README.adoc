@@ -12,12 +12,23 @@ One tool to do the following, since these processes should be basically the same
 
 == Installation
 
-Install it yourself as:
+Do `bundle install`
 
-`$ gem install mdmm`
+=== Configuration
+The config file can become an extensive document which may include sensitive information.
 
-Copy `config/config.yaml.example` to `config/config.yaml` and edit the new file.
+It can also be an important record of your project and should be in a location that will be backed up regularly. 
 
+*If you will only work on one project and/or don't plan on contributing code back to this repo...*
+You can edit `config/config.yaml` in place to set up your project. When you run commands, this default config location will be used.
+
+*If you will be working on multiple projects, need to keep your config(s) in a place where they can be backed up, or you want to avoid contributing your configs back to this repo...*
+
+Copy `config/config.yaml` to your desired location and edit the copy. Specify the path to the desired config when you run a command, like this:
+
+`exe/mdmm show_config --config=path/to/your/mdmm_config.yaml`
+
+The example `config.yaml` included with the repo is heavily commented and intends to be self-documenting.
 
 == Usage
 

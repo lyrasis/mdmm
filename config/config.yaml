@@ -1,0 +1,265 @@
+# base working directory or directories for the project
+# each directory found in one of these paths is treated like a collection
+wrk_dirs:
+  - '/opt/migrations/project/sourceSystem1'
+  - '/opt/migrations/project/sourceSystem2'
+
+# path to logfile
+logfile: /opt/migrations/project/mdmm.log
+
+# do not compile data/stats/reports on field values or types for field names beginning with (or equaling)
+#  any of the following
+# compiled CSVs will also exclude these fields
+reporting_ignore_field_prefixes:
+  - 'migchilddata'
+  - 'restrictionCode'
+  - 'transc'
+
+# path to which to write CSV fieldvalues file
+fieldvalues_file: /opt/migrations/project/_fieldvalues.csv
+
+# do not perform cleanup operations on field values in fields with names that begin with (or equal) any
+#   of the following
+cleanup_ignore_field_prefixes:
+  - 'mig'
+  - 'dm'
+  - 'fullrs'
+  - 'find'
+  - 'restrictionCode'
+
+# do not perform metadata mapping on fields with names that begin with (or equal) any
+#   of the following
+mapping_ignore_field_prefixes:
+  - 'mig'
+  - 'dm'
+  - 'fullrs'
+  - 'find'
+  - 'restrictionCode'
+
+# list of fields to process as dates
+# special cleanup and mappings are done on these fields
+date_fields:
+  - 'date'
+  - 'publis'
+
+# fix things that break the initial splitting and remapping processes
+# beginning/end of field anchors in regexp replacements will respect multivalue
+#   field delimiters that are initially present in the data
+prelim_replacements:
+    # remove non-breaking spaces in all fields in all collections
+  - colls: ''
+    fields: ''
+    find: "\u00A0"
+    replace: ' '
+    type: plain
+    # remove em tags in two fields of one collection
+  - colls:
+      - 'coll1'
+    fields:
+      - 'description'
+      - 'title'
+    find: '<\/?em>'
+    replace: ' '
+    type: regexp
+
+# the unambiguous and consistent string to use as a multivalued field delimiter
+multivalue_delimiter: ';;;'
+
+# configure replacements that split multivalued fields and ensure a consistent
+#  and unambiguous delimiter. Make sure you are adding the `multivalue_delimiter`
+#  you configured directly above --^
+# beginning/end of field anchors in regexp replacements will respect multivalue
+#   field delimiters that are initially present in the data
+splits:
+  # split on ' and ' in the author field of all collections
+  - colls: ''
+    fields:
+      - 'author'
+    find: ' and '
+    replace: ';;;'
+    type: plain
+  # split on ';' in several fields across all collections
+  - colls: ''
+    fields:
+      - 'author'
+      - 'identifier'
+      - 'subject'
+    find: ';'
+    replace: ';;;'
+    type: plain
+    # split descriptions on line breaks because of more complex formatting
+  - colls: ''
+    fields:
+      - 'description'
+    find: '<br *\/> *<br *\/>'
+    replace: ';;;'
+    type: regexp
+
+# add fields with constant values
+# you can specify brand new fields to be added to records or you can add constant values
+#  to existing fields in records. Adding to an existing field will NOT overwrite the values
+#  already in the field, but will add a new multi-value
+constant_fields:
+  # add organization code value 'theCode' in 'recsourceorg' field in all records in all collections
+  - colls: ''
+    field: recsourceorg
+    value: theCode
+  # add a title field value to only one collection
+  - colls:
+      - 'coll3'
+    field:
+      - 'title'
+    value: "Someone's Papers"
+    
+# Collections/fields in which to standardize the case of the first character of each value in the field
+# Mainly used for fields that will populate facets, to minimize split/near-duplicate
+#  facets due to case differences
+# Case value can be upper or lower
+case_changes:  
+  - colls: ''
+    fields:
+       - 'subject'
+       - 'format'
+    case: upper
+
+# Move a field value to a different field based on field values
+# Respects multivalued field boundaries. That is, if one of multiple values matches
+#  the criteria, only one value will be moved.
+# The `moveto` field can be a new or existing field.
+# If the value already exists in the `moveto` field, this will add a duplicate value.
+# If the move leaves the source field empty, the empty source field is removed from cleaned record.
+# The `condition` value is converted into a regular expression to do the matching. This means:
+#  - '.' will match any character
+#  - '\.' will match literal period
+#  - You can use beginning/end of field anchors and other regular expression syntax
+move_fields:
+  - colls:
+      - 'coll1'
+    fields:
+      - 'coverage'
+    moveto: coveragegeog
+    condition: 'Atlanta'
+  - colls: ''
+    fields:
+      - 'type'
+    moveto: format
+    condition: '^[Ss]peech$'
+
+# Moves a field value to another field and replaces it in original field with a different value.
+# For example, the `type` field may contain terms like drawings, paintings, photos. You may want to
+#   move those values to the `format` field and replace them in `type` with "still image"
+# Respects multivalued field boundaries. That is, if one of multiple values matches
+#  the criteria, only one value will be moved and replaced.
+# colls = which collections the edit should be applied to (all if blank)
+# fields = which source fields should be examined/treated
+# condition = perform the move-and-replace if this matches original/current field value.
+# moveto = matching value will be moved to this field
+# replace = this value will be added to original/current field
+
+# If the value already exists in the `moveto` field, this will add a duplicate value.
+# If the move leaves the source field empty, the empty source field is removed from cleaned record.
+# The `condition` value is converted into a regular expression to do the matching. See above for what this means.
+
+move_and_replaces:
+  - colls:
+      - 'coll1'
+      - 'coll2'
+    fields:
+      - 'type'
+    condition: '^[Mm]aps?'
+    moveto: format
+    replacewith: 'cartographic'
+
+# Adds a value to derivefield based on source field value, but does not change source field value
+# Examples where this can be helpful include:
+#  - providing a `type` field value based on format or genre values
+#  - creating fields to record relatedItem type, based on values in other fields
+# Does NOT add a duplicate value if the `derivevalue` already exists in the `derivefield` field
+# The `condition` value is converted into a regular expression to do the matching. See above for what this means.
+derive_fields:
+  - colls: ''
+    fields:
+      - 'format'
+    condition: '[Pp]hotograph|JPEG'
+    derivefield: type
+    derivevalue: 'still image'
+  - colls:
+      - 'coll2'
+    fields:
+      - 'related'
+    condition: 'finding aid at'
+    derivefield: relatedcollectionlinktype
+    derivevalue: 'Finding aid'
+    
+# Match part of one field and put only the matching part into another field.
+# The original field is NOT modified.
+# Will add duplicate values in `extracttofield`
+# fields = the field(s) to match in/extract FROM
+# condition = the value to match on (as a regexp). The regexp needs to include at least one
+#   capturing parenthetical
+# extracttofield = field the extracted value will be added to
+# extractmatch = capture group/match segment that will be added to extracttofield (start counting
+#  at 1)
+extractions:
+  - colls: ''
+    fields:
+      - 'related'
+    condition: 'Finding aid at: (http.*)$'
+    extracttofield: hostcolllink
+    extractmatch: 1
+  - colls: ''
+    fields:
+      - 'related'
+    condition: 'Cataloging record at (http.*)'
+    extracttofield: catlink
+    extractmatch: 1
+    
+# string replacements to be done
+# if `colls` or `fields` are left blank, replacement will be done on all fields
+# if the find string is just a literal string match, `type` = plain. `.` will be matched as a period, etc.
+# if the find string is a regular expression, `type` = regexp. `.` will be matched as any character, etc.
+#  NOTE: the surrounding // are NOT included in regexp find strings. 
+replacements:
+ # unicode replacement character
+  - colls: ''
+    fields:
+      - 'creato'
+    find: "�"
+    replace: "'"
+    type: plain
+  # delete HTML
+  - colls: ''
+    fields: ''
+    find: '<\/?(br|div|em|p|span|strong|sup) *\/*>'
+    replace: ' '
+    type: regexp
+
+# Replacements that run last and treat the entire field (i.e. all multi-values)
+#  as one string
+# Use to clean up spurious multivalue splits
+cross_multival_replacements:
+  - colls: ''
+    fields:
+      - 'relatedcollectiontitle'
+    find: "Finding aid;;;Photograph Collection"
+    replace: "Photograph Collection"
+    type: plain
+  - colls: ''
+    fields:
+      - 'relatedcollectiontitle'
+    find: "Fred Zim Papers;;;Fred J. Zim Papers"
+    replace: "Fred J. Zim Papers"
+    type: plain
+
+# full path to mappings csv in the following format
+#   collectionName,fieldname,mappingsnippet
+mappings: '/opt/migrations/project/mappings.csv'
+
+# the following MODS elements will be collapsed so that all children occur within one parent instance of the element
+single_mods_top_elements:
+  - extension
+  - originInfo
+  - physicalDescription
+
+# path to the MODS schema you wish to use
+mods_schema: /home/user/data/mods-3-6.xsd  

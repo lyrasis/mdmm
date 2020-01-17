@@ -71,7 +71,7 @@ module Mdmm
     end
 
     def map
-      Mdmm::RecordMapper.new(self)
+      Mdmm::RecordMapper.new(self, @coll.mappings)
     end
   end # CleanRecord
 end # Mdmm

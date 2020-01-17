@@ -1,4 +1,8 @@
 RSpec.describe Mdmm::MappingChecker do
+    before do
+      stub_const('Mdmm::CONFIG', Mdmm::ConfigReader.new('spec/fixtures/files/nearly_blank_config.yaml'))
+    end
+
 
   describe "#multifield" do
     context 'when more than one field is used in mapping' do
@@ -155,12 +159,6 @@ end # describe even
   end # describe multival
 
   describe '#dates' do
-    let!(Mdmm::CONFIGPATH) { stub_const('Mdmm::CONFIGPATH', 'spec/fixtures/files/nearly_blank_config.yaml') }
-
-    before do
-      stub_const('Mdmm::CONFIG', Mdmm::ConfigReader.new)
-    end
-
     context 'when none of the fields are date fields' do
       it "returns false" do
         s = '{"relfoldertitle":"Folder A","relfolderlink":"https://link.to.foldera"}'

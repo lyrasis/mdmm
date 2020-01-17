@@ -18,6 +18,8 @@ reporting_ignore_field_prefixes:
 cleanup_ignore_field_prefixes:
   - 'dontcleanme'
 
+multivalue_delimiter: ';;;'
+
 replacements:
  # unicode replacement character
   - colls:

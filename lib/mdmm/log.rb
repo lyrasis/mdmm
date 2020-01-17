@@ -1,5 +1,5 @@
 require 'mdmm'
 
 module Mdmm
-  LOG = Logger.new(Mdmm::CONFIG.logfile)
+  LOG = Logger.new(File.expand_path(Mdmm::CONFIG.logfile))
 end

@@ -10,13 +10,13 @@ module Mdmm
     attr_reader :mods
     attr_reader :elements
 	
-    def initialize(cleanrec)
+    def initialize(cleanrec, mappings)
       @rec = cleanrec
+      @mappings = mappings
       @coll = @rec.coll
       @orig = @rec.json
       @id = @rec.id
       Mdmm::LOG.debug("MODSMAPPINGS: #{@coll.name}/#{@id}: starting mapping of record")
-      @mappings = Mdmm::CONFIG.mappings[@coll.name].uniq
       @mods = base_mods
       @elements = []
       escape_characters

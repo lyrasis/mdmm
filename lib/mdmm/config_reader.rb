@@ -7,9 +7,9 @@ module Mdmm
     attr_reader :colls # array of collection paths
     attr_reader :mappings # array of MODS mappings
 
-    def initialize
-      @path = Mdmm::CONFIGPATH.empty? ? 'config/config.yaml' : Mdmm::CONFIGPATH
-      @config = YAML.load_file(@path)
+    def initialize(configpath = 'config/config.yaml')
+      @path = configpath.is_a?(String) ? configpath : configpath[:config]
+      @config = YAML.load_file(File.expand_path(@path))
       set_attributes
       @wrk_dirs.map!{ |dir| File.expand_path(dir) }
       set_colls
@@ -30,6 +30,7 @@ module Mdmm
         'cleanup_ignore_field_prefixes',
         'date_fields',
         'prelim_replacements',
+        'multivalue_delimiter',
         'splits',
         'constant_fields',
         'case_changes',

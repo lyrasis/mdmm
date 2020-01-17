@@ -1,4 +1,7 @@
 RSpec.describe Mdmm::ModsElementConsolidator do
+    before do
+      stub_const('Mdmm::CONFIG', Mdmm::ConfigReader.new('spec/fixtures/files/nearly_blank_config.yaml'))
+    end
 
   let(:elements) { [
     '<physicalDescription><form type="original">Color map</form></physicalDescription>',

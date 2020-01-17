@@ -1,9 +1,9 @@
 RSpec.describe Mdmm::ConfigReader do
-  let!(Mdmm::CONFIGPATH) { stub_const('Mdmm::CONFIGPATH', 'spec/fixtures/files/nearly_blank_config.yaml') }
-  let(:c) { ConfigReader.new }
+  let(:c) { ConfigReader.new('spec/fixtures/files/nearly_blank_config.yaml') }
 
   describe ".new" do
-  it "finds systema as one of two wrk_dirs" do
+    it "finds systema as one of two wrk_dirs" do
+      pp(c)
     expect(c.wrk_dirs.length).to eq(2)
     expect(c.wrk_dirs[0]).to include('systema')
   end
@@ -38,7 +38,7 @@ RSpec.describe Mdmm::ConfigReader do
   describe ".set_colls" do
     it "sets colls to array of all coll paths" do
       expect(c.colls).to be_instance_of(Array)
-      expect(c.colls.length).to eq(5)
+      expect(c.colls.length).to eq(3)
     end
   end
 
@@ -53,7 +53,7 @@ RSpec.describe Mdmm::ConfigReader do
     it "returned hash value for collection key is array of mapping rows" do
       result = c.mappings['bcolla']
       expect(result).to be_instance_of(Array)
-      expect(result.length).to eq(3)
+      expect(result.length).to eq(4)
     end
   end
 end

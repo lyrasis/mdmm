@@ -1,8 +1,7 @@
 RSpec.describe Mdmm::Record do
-  let!(Mdmm::CONFIGPATH) { stub_const('Mdmm::CONFIGPATH', 'spec/fixtures/files/nearly_blank_config.yaml') }
 
   before do
-    stub_const('Mdmm::CONFIG', Mdmm::ConfigReader.new)
+    stub_const('Mdmm::CONFIG', Mdmm::ConfigReader.new('spec/fixtures/files/nearly_blank_config.yaml'))
   end
   
   # omeka collection

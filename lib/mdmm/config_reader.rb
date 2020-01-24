@@ -57,24 +57,32 @@ module Mdmm
     def set_colls
       @colls = []
       @wrk_dirs.each{ |wrk_dir|
+        if Dir.exist?(wrk_dir)
         children = Dir.children(wrk_dir)
         colls = children.select{ |n| File.directory?("#{wrk_dir}/#{n}") }
         colls.each{ |collname| @colls << "#{wrk_dir}/#{collname}" }
+        else
+          puts "Directory #{wrk_dir} does not exist. Check your config file."
+        end
       }
     end
 
     def get_mappings(path)
       maphash = {}
-      CSV.foreach(File.expand_path(path), headers: true) do |row|
-        coll = row['coll alias']
-        mapping = row['MODS']
-        if maphash.has_key?(coll)
-          maphash[coll] << mapping
-        else
-          maphash[coll] = [mapping]
+      if File.exist?(path)
+        CSV.foreach(File.expand_path(path), headers: true) do |row|
+          coll = row['coll alias']
+          mapping = row['MODS']
+          if maphash.has_key?(coll)
+            maphash[coll] << mapping
+          else
+            maphash[coll] = [mapping]
+          end
         end
+        maphash
+      else
+        puts "Mapping file does not exist at #{path}. Check your config file."
       end
-      maphash
     end
     
       

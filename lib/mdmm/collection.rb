@@ -21,7 +21,7 @@ module Mdmm
       @modsdir = "#{@colldir}/_mods"
       Dir.mkdir(@modsdir) unless Dir::exist?(@modsdir)
       set_migrecs
-      @mappings = Mdmm::CONFIG.mappings[@name].uniq
+      set_mappings
       self
     end
 
@@ -43,6 +43,15 @@ module Mdmm
         migrec.clean
       }
       set_cleanrecs
+    end
+
+    def set_mappings
+      mappings = Mdmm::CONFIG.mappings
+      if mappings[@name]
+        @mappings = mappings[@name].uniq
+      else
+        Mdmm::LOG.warn("No mappings for collection: #{name}")
+        end
     end
     
     def set_cleanrecs

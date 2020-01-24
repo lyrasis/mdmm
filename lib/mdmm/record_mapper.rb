@@ -68,6 +68,9 @@ module Mdmm
       @mappings.each{ |m|
         Mdmm::LOG.debug("MODSMAPPINGS: #{@coll.name}/#{@id}: starting mapping: #{m}")
         insert_current_date if m['%insertcurrentdate%']
+        insert_migcollectionid if m['%migcollectionid%']
+        insert_migrecordid if m['%migrecordid%']
+        
         mapping = m.include?(';;;') ? Mdmm::MappingChooser.new(m, @orig).mapping : m
 
         if mapping.nil?
@@ -111,7 +114,14 @@ module Mdmm
       @orig['insertcurrentdate'] = Time.now.strftime("%Y-%m-%d")
     end
 
+    def insert_migcollectionid
+      @orig['migcollectionid'] = @coll.name
+    end
 
+    def insert_migrecordid
+      @orig['migrecordid'] = @id
+    end
+    
     def base_mods
       s = '<?xml version="1.0"?><mods xmlns="http://www.loc.gov/mods/v3" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:drs="http://www.lyrasis.org/drs"></mods>'
       Nokogiri::XML(s)

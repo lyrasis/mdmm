@@ -57,6 +57,7 @@ module Mdmm
     def set_colls
       @colls = []
       @wrk_dirs.each{ |wrk_dir|
+        wrk_dir = File.expand_path(wrk_dir)
         if Dir.exist?(wrk_dir)
         children = Dir.children(wrk_dir)
         colls = children.select{ |n| File.directory?("#{wrk_dir}/#{n}") }
@@ -69,8 +70,9 @@ module Mdmm
 
     def get_mappings(path)
       maphash = {}
+      path = File.expand_path(path)
       if File.exist?(path)
-        CSV.foreach(File.expand_path(path), headers: true) do |row|
+        CSV.foreach(path, headers: true) do |row|
           coll = row['coll alias']
           mapping = row['MODS']
           if maphash.has_key?(coll)

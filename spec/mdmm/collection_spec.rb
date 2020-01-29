@@ -4,6 +4,8 @@ RSpec.describe Mdmm::Collection do
   end
 
   let(:c) { Collection.new(File.expand_path('spec/fixtures/testproject/systema/acoll2')) }
+  let(:c2) { Collection.new(File.expand_path('spec/fixtures/testproject/systema/acoll1')) }
+
   describe ".new" do
     it "returns Mdmm::Collection object" do
       expect(c).to be_instance_of(Mdmm::Collection)
@@ -20,7 +22,7 @@ RSpec.describe Mdmm::Collection do
     it "migrecs attribute length == number of collection migrecs" do
       expect(c.migrecs.length).to eq(1)
     end
-    
+
     it "migrecs attribute elements are paths to mig record JSON" do
       expect(c.migrecs[0]).to eq(File.expand_path('spec/fixtures/testproject/systema/acoll2/_migrecords/1.json'))
     end
@@ -39,6 +41,16 @@ RSpec.describe Mdmm::Collection do
     
     it "creates modsrecdir" do
       expect(Dir.exist?(c.modsdir)).to be true
+    end
+  end
+
+  describe '#set_migrecs' do
+    before do
+      stub_const('Mdmm::CONFIG', Mdmm::ConfigReader.new('spec/fixtures/files/omit_recs_config.yaml'))
+    end
+
+    it 'omits specified records' do
+      expect(c2.migrecs.length).to eq(1)
     end
   end
 

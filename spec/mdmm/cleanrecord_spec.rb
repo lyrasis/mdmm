@@ -1,5 +1,8 @@
 RSpec.describe Mdmm::CleanRecord do
 
+  before do
+    stub_const('Mdmm::CONFIG', Mdmm::ConfigReader.new('spec/fixtures/files/nearly_blank_config.yaml'))
+  end
   
   # omeka collection
   let(:coll1) { Collection.new(File.expand_path('spec/fixtures/testproject/systemb/bcolla')) }

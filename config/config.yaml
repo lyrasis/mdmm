@@ -263,3 +263,10 @@ single_mods_top_elements:
 
 # path to the MODS schema you wish to use
 mods_schema: /home/user/data/mods-3-6.xsd  
+
+# list of records to omit from mdmm ingest package processing
+# specify collection and record id
+omitted_records:
+  - coll2:
+      - 4
+      - 33

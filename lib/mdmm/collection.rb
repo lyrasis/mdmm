@@ -21,7 +21,7 @@ module Mdmm
       @modsdir = "#{@colldir}/_mods"
       Dir.mkdir(@modsdir) unless Dir::exist?(@modsdir)
       set_migrecs
-      @mappings = Mdmm::CONFIG.mappings[@name].uniq
+      set_mappings
       self
     end
 
@@ -44,9 +44,20 @@ module Mdmm
       }
       set_cleanrecs
     end
+
+    def set_mappings
+      mappings = Mdmm::CONFIG.mappings
+      if mappings[@name]
+        @mappings = mappings[@name].uniq
+      else
+        Mdmm::LOG.warn("No mappings for collection: #{name}")
+        end
+    end
     
     def set_cleanrecs
-      @cleanrecs = Dir.new(@cleanrecdir).children.map{ |name| "#{@cleanrecdir}/#{name}" }
+      @cleanrecs = Dir.new(@cleanrecdir).children.map{ |name| name.sub('.json', '') }.map{ |id| id.to_i }
+      @cleanrecs = @cleanrecs - omitted_recs
+      @cleanrecs = @cleanrecs.map{ |id| "#{cleanrecdir}/#{id}.json" }
       if @cleanrecs.length == 0
         Mdmm::LOG.warn("No clean records in #{@cleanrecdir}. Run `exe/mdmm clean_recs`.")
         return
@@ -100,12 +111,27 @@ module Mdmm
     end
 
     def set_migrecs
-      @migrecs = Dir.new(@migrecdir).children.map{ |name| "#{@migrecdir}/#{name}" }
+      @migrecs = Dir.new(@migrecdir).children.map{ |name| name.sub('.json', '') }.map{ |id| id.to_i }
+      @migrecs = @migrecs - omitted_recs
+      @migrecs = @migrecs.map{ |id| "#{@migrecdir}/#{id}.json" }
       if @migrecs.length == 0
         Mdmm::LOG.error("No migrecords in #{@migrecdir}.")
         return
       else
         Mdmm::LOG.info("Identified #{@migrecs.length} migration records for #{@name}...")
+      end
+    end
+
+    def omitted_recs
+      config = Mdmm::CONFIG.omitted_records
+      if config.nil?
+        return []
+      else
+        if config.has_key?(@name)
+          return config[@name]
+        else
+          return []
+        end
       end
     end
 

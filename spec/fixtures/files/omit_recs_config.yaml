@@ -51,6 +51,9 @@ single_mods_top_elements:
   - originInfo
   - physicalDescription
 
-# omitted_records:
-#   - acoll1:
-#       - 2
+omitted_records:
+  acoll1:
+    - 2
+  collx:
+    - 666
+    - 999

@@ -6,6 +6,7 @@ module Mdmm
     attr_reader :config # the entire config hash
     attr_reader :colls # array of collection paths
     attr_reader :mappings # array of MODS mappings
+    attr_reader :omitted_records # Hash. Keys = collections with records to omit. Values = Array of rec ids to omit
 
     def initialize(configpath = 'config/config.yaml')
       @path = configpath.is_a?(String) ? configpath : configpath[:config]
@@ -14,11 +15,19 @@ module Mdmm
       @wrk_dirs.map!{ |dir| File.expand_path(dir) }
       set_colls
       @mappings = config['mappings'] ? get_mappings(config['mappings']) : {}
+      set_omitted_records
       return @config
     end
 
     private
 
+    def set_omitted_records
+      or_config = config['omitted_records']
+      unless or_config.nil? || or_config.empty?
+        @omitted_records = or_config
+      end
+    end
+    
     def set_attributes
       # reader attributes set verbatim from config are created and populated as
       #  empty arrays

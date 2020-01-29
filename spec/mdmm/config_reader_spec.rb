@@ -4,35 +4,35 @@ RSpec.describe Mdmm::ConfigReader do
   describe ".new" do
     it "finds systema as one of two wrk_dirs" do
       pp(c)
-    expect(c.wrk_dirs.length).to eq(2)
-    expect(c.wrk_dirs[0]).to include('systema')
-  end
+      expect(c.wrk_dirs.length).to eq(2)
+      expect(c.wrk_dirs[0]).to include('systema')
+    end
 
-  context 'when verbatim-set options are specified in config' do
-    it 'returns populated array' do
-      expect(c.replacements).to be_instance_of(Array)
-      expect(c.replacements.length).to eq(2)
+    context 'when verbatim-set options are specified in config' do
+      it 'returns populated array' do
+        expect(c.replacements).to be_instance_of(Array)
+        expect(c.replacements.length).to eq(2)
+      end
     end
-  end
-  
-  context 'when verbatim-set options are unspecified in config' do
-    it "returns empty arrays" do
-      [c.fieldvalues_file,
-       c.prelim_replacements,
-       c.splits,
-       c.constant_fields,
-       c.case_changes,
-       c.move_fields,
-       c.move_and_replaces,
-       c.derive_fields,
-       c.extractions,
-       c.cross_multival_replacements
-      ].each{ |atr|
-        expect(atr).to be_instance_of(Array)
-        expect(atr).to be_empty
-      }
+    
+    context 'when verbatim-set options are unspecified in config' do
+      it "returns empty arrays" do
+        [c.fieldvalues_file,
+         c.prelim_replacements,
+         c.splits,
+         c.constant_fields,
+         c.case_changes,
+         c.move_fields,
+         c.move_and_replaces,
+         c.derive_fields,
+         c.extractions,
+         c.cross_multival_replacements
+        ].each{ |atr|
+          expect(atr).to be_instance_of(Array)
+          expect(atr).to be_empty
+        }
+      end
     end
-  end
   end
 
   describe ".set_colls" do
@@ -56,4 +56,22 @@ RSpec.describe Mdmm::ConfigReader do
       expect(result.length).to eq(4)
     end
   end
+
+  describe '.set_omitted_records' do
+    context 'when omitted records not specified in config' do
+      it 'omitted_records is nil' do
+        expect(c.omitted_records).to be_nil
+      end
+    end
+
+    context 'when omitted records are specified in config' do
+      let(:c) { ConfigReader.new('spec/fixtures/files/omit_recs_config.yaml') }
+
+      it 'omitted_records is the expected hash' do
+        h = {'acoll1' => [2], 'collx' => [666, 999]}
+        expect(c.omitted_records).to eq(h)
+      end
+    end
+  end
+  
 end

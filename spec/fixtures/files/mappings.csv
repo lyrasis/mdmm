@@ -1,4 +1,4 @@
-coll alias,nick,MODS
+coll,nick,MODS
 acoll1,contributor,"<name><namePart>%contributor%</namePart><role><roleTerm authority=""marcrelator"" type=""text"">contributor</roleTerm></role></name>"
 acoll1,coverage,"<subject displayLabel=""Coverage""><temporal>%coverage%</temporal></subject>"
 acoll1,creator,"<name><namePart>%creator%</namePart><role><roleTerm authority=""marcrelator"" type=""text"">creator</roleTerm></role></name>"

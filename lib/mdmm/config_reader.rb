@@ -73,7 +73,7 @@ module Mdmm
       path = File.expand_path(path)
       if File.exist?(path)
         CSV.foreach(path, headers: true) do |row|
-          coll = row['coll alias']
+          coll = row['coll']
           mapping = row['MODS']
           if maphash.has_key?(coll)
             maphash[coll] << mapping

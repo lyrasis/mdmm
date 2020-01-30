@@ -120,6 +120,23 @@ FORMAT: report format. `exploded` produces csv with one row per field per record
       Mdmm::FieldValueCompiler.new(colls, options[:type], options[:format])
     end
 
+    desc 'plan_ingest', 'produces an ingest package creation plan to review before actual ingest package creation'
+    long_desc <<-LONGDESC
+`exe/mdmm plan_ingest` produces ingest_manifest.txt file in collection directory which specifies the intended directory structure of the ingest packages to be created.
+
+This file is used to execute the actual ingest package creation, so you can edit it manually to account for any strange things.
+
+This file is also used to reverse ingest package creation, if you need to re-run object validation or metadata cleaning/transformation steps
+    LONGDESC
+    option :coll, :desc => 'comma-separated list of coll names to include in processing', :default => ''
+    def plan_ingest
+      colls = get_colls
+      colls.each{ |coll|
+        puts "Planning ingest for collection: #{coll.name}"
+        coll.plan_ingest
+      }
+    end
+
     desc 'clean_records', 'cleans migrecords, saving them as cleanrecords'
     long_desc <<-LONGDESC
 `exe/mdmm clean_records` does stuff... 

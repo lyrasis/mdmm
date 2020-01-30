@@ -8,7 +8,8 @@ module Mdmm
     attr_reader :fields # array of fields present in record
     attr_reader :reportfields # array of fields included in reporting
     attr_reader :id
-
+    attr_reader :filetype # String. File type suffix
+    
     # initialize with Mdmm::Collection object and path to record file
     def initialize(coll, path)
       @coll = coll
@@ -20,6 +21,7 @@ module Mdmm
       else
         @id = @json['dmrecord']
       end
+      @filetype = @json['migfiletype'].downcase
       self
     end
 
@@ -28,6 +30,48 @@ module Mdmm
       return false
     end
 
+    def is_external_media?
+      return true if @json['migobjcategory'] == 'external media'
+      return false
+    end
+
+    def in_subcollection?
+      return true if @json['migcollectionset']
+      return false
+    end
+
+    def subcollection
+      @json['migcollectionset']
+    end
+
+    def mods_path
+      "#{@coll.modsdir}/#{@id}.xml"
+    end
+
+    def has_mods?
+      return true if File::exist?(mods_path)
+    end
+
+    def obj_path
+      "#{@coll.objdir}/#{@id}.#{@filetype}"
+    end
+
+    def has_obj?
+      return true if File::exist?(obj_path)
+    end
+
+    def tn_path
+      jpgpath = "#{@coll.tndir}/#{@id}.jpg"
+      return jpgpath if File::exist?(jpgpath)
+      pngpath = "#{@coll.tndir}/#{@id}.png"
+      return pngpath if File::exist?(pngpath)
+      return nil
+    end
+
+    def has_tn?
+      return true if File::exist?(tn_path)
+    end
+    
     private
 
     def get_reportfields
@@ -42,10 +86,14 @@ module Mdmm
 
   class MigRecord < Record
     attr_reader :cleanfields # array of fields included in cleaning
+    attr_reader :contentmodel # String. Islandora content model assigned to record
+    attr_reader :children # Array. List of pointers to child objects
     
     def initialize(coll, path)
       super(coll, path)
       @cleanfields = get_cleanfields
+      @contentmodel = @json['islandora_content_model']
+      @children = @json['migchildptrs'] if @json['migchildptrs']
     end
 
     def clean

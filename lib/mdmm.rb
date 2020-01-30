@@ -49,6 +49,8 @@ module Mdmm
   autoload :MappingChecker, 'mdmm/mapping_checker'
   autoload :ModsElementConsolidator, 'mdmm/mods_element_consolidator'
   autoload :ModsElementOrderer, 'mdmm/mods_element_orderer'
+
+  autoload :IngestPlanner, 'mdmm/ingest_planner'
   # -=-=-
   # Utility methods used across classes/etc
   # -=-=-

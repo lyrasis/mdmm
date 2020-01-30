@@ -7,7 +7,10 @@ module Mdmm
     attr_reader :migrecdir # path to directory for JSON object records modified with migration-specific data
     attr_reader :cleanrecdir # path to directory for transformed/cleaned migration records
     attr_reader :modsdir # path to directory for MODS records
-    attr_reader :migrecs #array of migration record filenames
+    attr_reader :objdir # path to directory for MODS records
+    attr_reader :tndir # path to directory for thumbnails
+    attr_reader :ingestpkgdir # path to directory for ingest packages
+    attr_reader :migrecs #array of migration record filepaths
     attr_reader :cleanrecs #array of clean record filenames
     attr_reader :mappings #metadata mappings for this collection
 
@@ -18,13 +21,23 @@ module Mdmm
       @migrecdir = "#{@colldir}/_migrecords"
       @cleanrecdir = "#{@colldir}/_cleanrecords"
       Dir.mkdir(@cleanrecdir) unless Dir::exist?(@cleanrecdir)
+      @objdir = "#{@colldir}/_objects"
+      @ingestpkgdir = "#{@colldir}/_ingestpackages"
+      Dir.mkdir(@ingestpkgdir) unless Dir::exist?(@ingestpkgdir)
       @modsdir = "#{@colldir}/_mods"
       Dir.mkdir(@modsdir) unless Dir::exist?(@modsdir)
+      @tndir = "#{@colldir}/thumbnails"
+      Dir.mkdir(@tndir) unless Dir::exist?(@tndir)
       set_migrecs
       set_mappings
       self
     end
 
+    def plan_ingest
+      Mdmm::LOG.debug("INGEST PLAN: Planning ingest for: #{@name}")
+      Mdmm::IngestPlanner.new(self)
+    end
+    
     def map_records
       delete_existing_mods
       set_cleanrecs

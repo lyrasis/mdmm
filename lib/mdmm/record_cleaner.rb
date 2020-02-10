@@ -8,7 +8,7 @@ module Mdmm
     attr_reader :cleaned
     attr_reader :fields
     attr_reader :id
-	
+    
     def initialize(migrec)
       @coll = migrec.coll
       @orig = migrec.json
@@ -45,8 +45,8 @@ module Mdmm
         date_fields[field] = value if Mdmm.date_field?(field)
       }
       date_fields.each{ |field, value|
-          d = Mdmm::DateParser.new("#{coll.name}/#{id}", value).result
-          @working["#{field}_cleaned"] = d.join(Mdmm::CONFIG.multivalue_delimiter)
+        d = Mdmm::DateParser.new("#{coll.name}/#{id}", value).result
+        @working["#{field}_cleaned"] = d.join(Mdmm::CONFIG.multivalue_delimiter)
       }
     end
     
@@ -260,7 +260,8 @@ module Mdmm
       h = { :to_clean => {},
            :to_ignore => {}
           }
-      orig.each{ |field, value|
+      
+      @orig.each{ |field, value|
         case @fields.include?(field)
         when true
           h[:to_clean][field] = value

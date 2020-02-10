@@ -25,6 +25,9 @@ module Mdmm
       or_config = config['omitted_records']
       unless or_config.nil? || or_config.empty?
         @omitted_records = or_config
+        @omitted_records.each{ |coll, arr|
+          arr = arr.map{ |id| id.to_s }
+        }
       end
     end
     
@@ -50,7 +53,8 @@ module Mdmm
         'replacements',
         'cross_multival_replacements',
         'single_mods_top_elements',
-        'mods_schema'
+        'mods_schema',
+        'default_external_media_image'
       ].each{ |atr|
         self.class.instance_eval{ attr_reader atr.to_sym }
         instance_variable_set("@#{atr}", [])

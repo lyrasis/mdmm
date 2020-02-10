@@ -12,6 +12,7 @@ module Mdmm
     attr_reader :ingestpkgdir # path to directory for ingest packages
     attr_reader :migrecs #array of migration record filepaths
     attr_reader :cleanrecs #array of clean record filenames
+    attr_reader :omittedrecs #array of rec ids to be omitted from processing
     attr_reader :mappings #metadata mappings for this collection
 
     # Directories within WRK_DIR are identified as collections
@@ -29,15 +30,12 @@ module Mdmm
       @tndir = "#{@colldir}/thumbnails"
       Dir.mkdir(@tndir) unless Dir::exist?(@tndir)
       set_migrecs
+      set_cleanrecs
       set_mappings
+      @omittedrecs = omitted_recs
       self
     end
 
-    def plan_ingest
-      Mdmm::LOG.debug("INGEST PLAN: Planning ingest for: #{@name}")
-      Mdmm::IngestPlanner.new(self)
-    end
-    
     def map_records
       delete_existing_mods
       set_cleanrecs
@@ -68,14 +66,14 @@ module Mdmm
     end
     
     def set_cleanrecs
-      @cleanrecs = Dir.new(@cleanrecdir).children.map{ |name| name.sub('.json', '') }.map{ |id| id.to_i }
-      @cleanrecs = @cleanrecs - omitted_recs
-      @cleanrecs = @cleanrecs.map{ |id| "#{cleanrecdir}/#{id}.json" }
+      @cleanrecs = Dir.new(@cleanrecdir).children.map{ |name| name.sub('.json', '') }
       if @cleanrecs.length == 0
         Mdmm::LOG.warn("No clean records in #{@cleanrecdir}. Run `exe/mdmm clean_recs`.")
         return
       else
         Mdmm::LOG.info("Identified #{@cleanrecs.length} clean records for #{@name}...")
+        @cleanrecs = @cleanrecs - omitted_recs
+        @cleanrecs = @cleanrecs.map{ |id| "#{cleanrecdir}/#{id}.json" }
       end
     end
 
@@ -124,7 +122,7 @@ module Mdmm
     end
 
     def set_migrecs
-      @migrecs = Dir.new(@migrecdir).children.map{ |name| name.sub('.json', '') }.map{ |id| id.to_i }
+      @migrecs = Dir.new(@migrecdir).children.map{ |name| name.sub('.json', '') }
       @migrecs = @migrecs - omitted_recs
       @migrecs = @migrecs.map{ |id| "#{@migrecdir}/#{id}.json" }
       if @migrecs.length == 0
@@ -141,7 +139,7 @@ module Mdmm
         return []
       else
         if config.has_key?(@name)
-          return config[@name]
+          return config[@name].map{ |e| e.to_s }
         else
           return []
         end

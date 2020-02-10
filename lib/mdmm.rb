@@ -23,6 +23,8 @@ module Mdmm
   autoload :LOG, 'mdmm/log'
 
   autoload :CommandLine, 'mdmm/command_line'
+  autoload :IngestPrep, 'mdmm/command_line'
+
   autoload :Collection, 'mdmm/collection'
   autoload :DateParser, 'mdmm/date_parser'
 
@@ -51,6 +53,8 @@ module Mdmm
   autoload :ModsElementOrderer, 'mdmm/mods_element_orderer'
 
   autoload :IngestPlanner, 'mdmm/ingest_planner'
+  autoload :IngestPlan, 'mdmm/ingest_plan'
+
   # -=-=-
   # Utility methods used across classes/etc
   # -=-=-

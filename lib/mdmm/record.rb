@@ -9,6 +9,8 @@ module Mdmm
     attr_reader :reportfields # array of fields included in reporting
     attr_reader :id
     attr_reader :filetype # String. File type suffix
+    attr_reader :contentmodel # String. Islandora content model assigned to record
+    attr_reader :children # Array. List of pointers to child objects
     
     # initialize with Mdmm::Collection object and path to record file
     def initialize(coll, path)
@@ -21,7 +23,9 @@ module Mdmm
       else
         @id = @json['dmrecord']
       end
-      @filetype = @json['migfiletype'].downcase
+      @filetype = @json['migfiletype'].downcase if @json['migfiletype']
+      @contentmodel = @json['islandora_content_model'] if @json['islandora_content_model']
+      @children = set_children
       self
     end
 
@@ -32,6 +36,7 @@ module Mdmm
 
     def is_external_media?
       return true if @json['migobjcategory'] == 'external media'
+      return true if @json['externalmedialink']
       return false
     end
 
@@ -69,10 +74,17 @@ module Mdmm
     end
 
     def has_tn?
-      return true if File::exist?(tn_path)
+      return true if tn_path && File::exist?(tn_path)
     end
     
     private
+
+    def set_children
+      if @json['migchildptrs']
+        @children = @json['migchildptrs'] if @json['migchildptrs'].is_a?(Array)
+        @children = @json['migchildptrs'].split(Mdmm::CONFIG.multivalue_delimiter) if @json['migchildptrs'].is_a?(String)
+      end
+    end
 
     def get_reportfields
       rfields = @fields.clone
@@ -86,14 +98,10 @@ module Mdmm
 
   class MigRecord < Record
     attr_reader :cleanfields # array of fields included in cleaning
-    attr_reader :contentmodel # String. Islandora content model assigned to record
-    attr_reader :children # Array. List of pointers to child objects
     
     def initialize(coll, path)
       super(coll, path)
       @cleanfields = get_cleanfields
-      @contentmodel = @json['islandora_content_model']
-      @children = @json['migchildptrs'] if @json['migchildptrs']
     end
 
     def clean
@@ -105,7 +113,7 @@ module Mdmm
     def get_cleanfields
       cleanfields = @fields.clone
       Mdmm::CONFIG.cleanup_ignore_field_prefixes.each{ |prefix|
-        cleanfields.reject!{ |f| f.start_with?(prefix) }
+        cleanfields = cleanfields.reject{ |f| f.start_with?(prefix)}
       }
       @cleanfields = cleanfields
     end

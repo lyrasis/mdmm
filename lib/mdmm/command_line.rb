@@ -1,6 +1,98 @@
 require 'mdmm'
 
 module Mdmm
+  class IngestPrep < Thor
+    no_commands{
+      def get_colls
+        colls = CONFIG.colls.map{ |cpath| Mdmm::Collection.new(cpath) }
+
+        if options[:coll].empty?
+          # not specifying collections will return all collections
+          puts "Will process all #{colls.length} collections."
+          return colls
+        else
+          # return only the specified collections
+          allcollnames = colls.map{ |c| c.name }
+          enteredcollnames = options[:coll].split(',')
+          enteredcollnames.each{ |c|
+            unless allcollnames.include?(c)
+              puts "There is no collection directory named #{c}"
+              puts "Run `exe/mdmm list_colls` to see known collections in your config."
+              exit
+            end
+          }
+          docolls = colls.select{ |coll| enteredcollnames.include?(coll.name) }
+          puts "Will process #{docolls.length} collection(s)."
+          return docolls
+        end
+      end #get_colls
+    }
+    
+    desc 'plan', 'produces an ingest package creation plan to review before actual ingest package creation'
+    long_desc <<-LONGDESC
+`exe/mdmm plan_ingest` produces `_ingest_plan.json` file in collection directory which specifies the intended directory structure of the ingest packages to be created.
+
+This file is used to execute the actual ingest package creation, so you can edit it manually to account for any strange things.
+
+This file is also used to reverse ingest package creation, if you need to re-run object validation or metadata cleaning/transformation steps
+    LONGDESC
+    option :coll, :desc => 'comma-separated list of coll names to include in processing', :default => ''
+    def plan
+      colls = get_colls
+      colls.each{ |coll|
+        puts "Planning ingest for collection: #{coll.name}"
+        Mdmm::IngestPlanner.new(coll)
+      }
+    end
+
+    desc 'print', 'prints ingest package plan for examination'
+    option :coll, :desc => 'comma-separated list of coll names to include in processing', :default => ''
+    def print
+      colls = get_colls
+      colls.each{ |coll|
+        Mdmm::IngestPlan.new(coll).print
+      }
+    end
+
+    desc 'list_packages', 'prints list of packages that will be created'
+    option :coll, :desc => 'comma-separated list of coll names to include in processing', :default => ''
+    def list_packages
+      colls = get_colls
+      colls.each{ |coll|
+        Mdmm::IngestPlan.new(coll).list_packages
+      }
+    end
+
+    desc 'list_omitted_objs', 'prints list of objects that are not included in the ingest packages'
+    option :coll, :desc => 'comma-separated list of coll names to include in processing', :default => ''
+    def list_omitted_objs
+      colls = get_colls
+      colls.each{ |coll|
+        Mdmm::IngestPlan.new(coll).list_omitted_objs
+      }
+    end
+
+    desc 'execute_plan', 'executes the ingest package generation plan'
+    option :coll, :desc => 'comma-separated list of coll names to include in processing', :default => ''
+    def execute_plan
+      colls = get_colls
+      colls.each{ |coll|
+        Mdmm::IngestPlan.new(coll).execute_plan
+      }
+    end
+
+    desc 'reverse_plan', 'reverses the ingest package generation plan, restoring original flat file structure'
+    option :coll, :desc => 'comma-separated list of coll names to include in processing', :default => ''
+    def reverse_plan
+      colls = get_colls
+      colls.each{ |coll|
+        Mdmm::IngestPlan.new(coll).reverse_plan
+      }
+    end
+
+  end #class IngestPrep < Thor
+
+
   class CommandLine < Thor
     def initialize(*args)
       super(*args)
@@ -51,6 +143,9 @@ module Mdmm
       pp(Mdmm::CONFIG)
     end
 
+    desc 'ingestprep SUBCOMMAND ...ARGS', 'create, test, execute, and reverse ingest plans for collections'
+    subcommand 'ingestprep', IngestPrep
+    
     desc 'list_colls', 'list directories that will be treated as collections'
     def list_colls
       puts "\nDirectories to be treated as collections:"
@@ -120,23 +215,6 @@ FORMAT: report format. `exploded` produces csv with one row per field per record
       Mdmm::FieldValueCompiler.new(colls, options[:type], options[:format])
     end
 
-    desc 'plan_ingest', 'produces an ingest package creation plan to review before actual ingest package creation'
-    long_desc <<-LONGDESC
-`exe/mdmm plan_ingest` produces ingest_manifest.txt file in collection directory which specifies the intended directory structure of the ingest packages to be created.
-
-This file is used to execute the actual ingest package creation, so you can edit it manually to account for any strange things.
-
-This file is also used to reverse ingest package creation, if you need to re-run object validation or metadata cleaning/transformation steps
-    LONGDESC
-    option :coll, :desc => 'comma-separated list of coll names to include in processing', :default => ''
-    def plan_ingest
-      colls = get_colls
-      colls.each{ |coll|
-        puts "Planning ingest for collection: #{coll.name}"
-        coll.plan_ingest
-      }
-    end
-
     desc 'clean_records', 'cleans migrecords, saving them as cleanrecords'
     long_desc <<-LONGDESC
 `exe/mdmm clean_records` does stuff... 
@@ -178,6 +256,7 @@ This file is also used to reverse ingest package creation, if you need to re-run
         coll.compile_mods(options[:path])
       }
     end
-
   end # CommandLine
+
+  
 end # Mdmm

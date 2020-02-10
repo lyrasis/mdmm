@@ -1,4 +1,3 @@
-
 require 'mdmm'
 
 module Mdmm
@@ -13,11 +12,20 @@ module Mdmm
       @plan = []
       @recs = get_recs
       @recs.each{ |rec| add_ingest_plan(rec) }
+      add_plan_step_ids
       write_plan
     end
 
     private
 
+    def add_plan_step_ids
+      ct = 1
+      @plan.each{ |h|
+        h['stepid'] = ct
+        ct += 1
+      }
+    end
+    
     def write_plan
       File.open("#{@coll.colldir}/_ingest_plan.json", 'w'){ |f|
         f.write(@plan.to_json)
@@ -46,9 +54,10 @@ module Mdmm
     end
 
     def single_level_hierarchical_ingest_plan(rec, type)
+      pkgdir = rec.in_subcollection? ? "#{rec.coll.ingestpkgdir}/subcoll#{rec.subcollection}" : rec.coll.ingestpkgdir
       if rec.has_mods?
         origmods = rec.mods_path
-        newmods = "#{rec.coll.ingestpkgdir}/#{type}/#{rec.id}/MODS.xml"
+        newmods = "#{pkgdir}/#{type}/#{rec.id}/MODS.xml"
       else
         Mdmm::LOG.warn("INGEST_PLAN: No MODS for #{type} parent #{rec.coll.name}/#{rec.id}")
         return
@@ -61,17 +70,19 @@ module Mdmm
         return
       end
 
-      @plan << hash_up([origmods, newmods])
+      @plan << hash_up('copy', [origmods, newmods])
     end
 
     def child_ingest_plan(parentrec, type, id)
-      safeid = id == '0' ? '01' : id
+      pkgdir = parentrec.in_subcollection? ? "#{parentrec.coll.ingestpkgdir}/subcoll#{parentrec.subcollection}" : parentrec.coll.ingestpkgdir
+      childid = id.sub("#{parentrec.id}-", '')
+      safeid = childid == '0' ? '01' : childid
       path = "#{parentrec.coll.migrecdir}/#{id}.json"
       rec = Mdmm::MigRecord.new(parentrec.coll, path)
 
       if rec.has_mods?
         origmods = rec.mods_path
-        newmods = "#{rec.coll.ingestpkgdir}/#{type}/#{parentrec.id}/#{safeid}/MODS.xml"
+        newmods = "#{pkgdir}/#{type}/#{parentrec.id}/#{safeid}/MODS.xml"
       else
         Mdmm::LOG.warn("INGEST_PLAN: No MODS for #{type} child #{rec.coll.name}/#{rec.id}")
         return
@@ -80,41 +91,45 @@ module Mdmm
       if rec.has_obj?
         origobj = rec.obj_path
         ext = File.extname(origobj)
-        newobj = "#{rec.coll.ingestpkgdir}/#{type}/#{parentrec.id}/#{safeid}/OBJ#{ext}"
+        newobj = "#{pkgdir}/#{type}/#{parentrec.id}/#{safeid}/OBJ#{ext}"
       else
         Mdmm::LOG.warn("INGEST_PLAN: No OBJ for #{type} child #{rec.coll.name}/#{rec.id}")
         return
       end
 
-      @plan << hash_up([origmods, newmods])
-      @plan << hash_up([origobj, newobj])
+      @plan << hash_up('copy', [origmods, newmods])
+      @plan << hash_up('move', [origobj, newobj])
     end
     
     def simple_ingest_plan(rec, type)
+      pkgdir = rec.in_subcollection? ? "#{rec.coll.ingestpkgdir}/subcoll#{rec.subcollection}" : rec.coll.ingestpkgdir
+
       if rec.has_mods?
         origmods = rec.mods_path
-        newmods = "#{rec.coll.ingestpkgdir}/#{type}/#{rec.id}.xml"
+        newmods = "#{pkgdir}/#{type}/#{rec.id}.xml"
       else
-        Mdmm::LOG.warn("INGEST_PLAN: No MODS for #{rec.coll.name}/#{rec.id}")
+        Mdmm::LOG.warn("INGEST_PLAN: No MODS for simple #{type} #{rec.coll.name}/#{rec.id}")
         return
       end
       
       if rec.has_obj?
         origobj = rec.obj_path
-        newobj = "#{rec.coll.ingestpkgdir}/#{type}/#{rec.id}.#{rec.filetype}"
+        newobj = "#{pkgdir}/#{type}/#{rec.id}.#{rec.filetype}"
       else
-        Mdmm::LOG.warn("INGEST_PLAN: No OBJ for #{rec.coll.name}/#{rec.id}")
+        Mdmm::LOG.warn("INGEST_PLAN: No OBJ for simple #{type} #{rec.coll.name}/#{rec.id}")
         return
       end
       
 
-      @plan << hash_up([origmods, newmods])
-      @plan << hash_up([origobj, newobj])
+      @plan << hash_up('copy', [origmods, newmods])
+      @plan << hash_up('move', [origobj, newobj])
       #      h = {type => {origmods => newmods, origobj => newobj}}
       #      @plan = @plan.merge(h){ |key, oldval, newval| oldval.merge(newval) }
     end
 
     def external_media_ingest_plan(rec)
+      pkgdir = rec.in_subcollection? ? "#{rec.coll.ingestpkgdir}/subcoll#{rec.subcollection}" : rec.coll.ingestpkgdir
+      
       if rec.has_mods?
         origmods = rec.mods_path
       else
@@ -126,30 +141,38 @@ module Mdmm
         origobj = rec.obj_path
       elsif rec.has_tn?
         origobj = rec.tn_path
+      else
+        default_img = Mdmm::CONFIG.default_external_media_image
       end
 
-      if origobj
-        newmods = "#{rec.coll.ingestpkgdir}/basic_image/#{rec.id}.xml"
-        obj_basename = File.basename(origobj)
-        newobj = "#{rec.coll.ingestpkgdir}/basic_image/#{obj_basename}"
-        @plan << hash_up([origmods, newmods])
-        @plan << hash_up([origobj, newobj])
+      if origobj || default_img
+        newmods = "#{pkgdir}/basic_image/#{rec.id}.xml"
+        @plan << hash_up('copy', [origmods, newmods])
+        
+        if origobj
+          obj_basename = File.basename(origobj)
+          newobj = "#{pkgdir}/basic_image/#{obj_basename}"
+          @plan << hash_up('move', [origobj, newobj])
+        elsif default_img
+          ext = File.extname(default_img)
+          newobj = "#{pkgdir}/basic_image/#{rec.id}#{ext}"
+          @plan << hash_up('copy', [default_img, newobj])
+        end
       else
         Mdmm::LOG.warn("INGEST_PLAN: No OBJ for external media record #{rec.coll.name}/#{rec.id}")
         return
       end
     end
 
-    def hash_up(arr)
-      {:flatpath => arr[0], :ingestpath => arr[1]}
+    def hash_up(operation, arr)
+      {'do' => operation, 'origpath' => arr[0], 'ingestpath' => arr[1]}
     end
-
 
     def get_recs
       recs = []
-      @coll.migrecs.each{ |path|
-        migrec = Mdmm::MigRecord.new(@coll, path)
-        recs << migrec if migrec.contentmodel
+      @coll.cleanrecs.each{ |path|
+        cleanrec = Mdmm::CleanRecord.new(@coll, path)
+        recs << cleanrec if cleanrec.contentmodel
       }
       recs
     end

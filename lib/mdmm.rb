@@ -55,6 +55,8 @@ module Mdmm
   autoload :IngestPlanner, 'mdmm/ingest_planner'
   autoload :IngestPlan, 'mdmm/ingest_plan'
 
+  autoload :ObjectTypeHash, 'mdmm/object_type_hash'
+
   # -=-=-
   # Utility methods used across classes/etc
   # -=-=-

@@ -267,9 +267,9 @@ mods_schema: /home/user/data/mods-3-6.xsd
 # list of records to omit from mdmm ingest package processing
 # specify collection and record id
 omitted_records:
-  - coll2:
-      - 4
-      - 33
+  coll2:
+    - 4
+    - 33
 
 # path to image to use as object when record is flagged as an externalmedia record and has no associated object    
 default_external_media_image: /opt/migrations/client/thumbnail.jpg

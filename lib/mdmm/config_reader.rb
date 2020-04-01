@@ -22,7 +22,7 @@ module Mdmm
     private
 
     def set_omitted_records
-      or_config = config['omitted_records']
+      or_config = @config['omitted_records']
       unless or_config.nil? || or_config.empty?
         @omitted_records = or_config
         @omitted_records.each{ |coll, arr|

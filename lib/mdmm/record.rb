@@ -34,6 +34,11 @@ module Mdmm
       return false
     end
 
+    def is_compound?
+      return true if @json['migobjcategory'] == 'compound'
+      return false
+    end
+    
     def is_external_media?
       return true if @json['migobjcategory'] == 'external media'
       return true if @json['externalmedialink']
@@ -83,6 +88,8 @@ module Mdmm
       if @json['migchildptrs']
         @children = @json['migchildptrs'] if @json['migchildptrs'].is_a?(Array)
         @children = @json['migchildptrs'].split(Mdmm::CONFIG.multivalue_delimiter) if @json['migchildptrs'].is_a?(String)
+      else
+        @children = []
       end
     end
 
@@ -121,13 +128,39 @@ module Mdmm
   end # MigRecord
 
   class CleanRecord < Record
+    attr_reader :childrecs # Array of CleanRecords for child objects
+    attr_reader :childtypes # Array of filetypes of child objects
     
     def initialize(coll, path)
       super(coll, path)
+      @childrecs = []
+      @childtypes = []
+      if @children.length > 0
+        populate_childrecs
+        populate_childtypes
+      end
     end
 
     def map
       Mdmm::RecordMapper.new(self, @coll.mappings)
     end
+
+    private
+
+    def populate_childrecs
+      @children.each{ |childptr|
+        @childrecs << Mdmm::CleanRecord.new(@coll, "#{@coll.cleanrecdir}/#{childptr}.json")
+      }
+    end
+
+    def populate_childtypes
+      h = {}
+      @childrecs.each{ |child| h[child.filetype] = 0 }
+      keys = h.keys
+      
+      keys = keys.sort unless keys.empty?
+      @childtypes = keys
+    end
+    
   end # CleanRecord
 end # Mdmm

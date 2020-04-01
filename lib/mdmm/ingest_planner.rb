@@ -75,7 +75,7 @@ module Mdmm
 
     def child_ingest_plan(parentrec, type, id)
       pkgdir = parentrec.in_subcollection? ? "#{parentrec.coll.ingestpkgdir}/subcoll#{parentrec.subcollection}" : parentrec.coll.ingestpkgdir
-      childid = id.sub("#{parentrec.id}-", '')
+      childid = id.sub("#{parentrec.id}-", '').sub('-', '')
       safeid = childid == '0' ? '01' : childid
       path = "#{parentrec.coll.migrecdir}/#{id}.json"
       rec = Mdmm::MigRecord.new(parentrec.coll, path)

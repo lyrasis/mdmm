@@ -1,4 +1,3 @@
-
 require 'mdmm'
 
 module Mdmm
